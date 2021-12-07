@@ -1,13 +1,33 @@
 Package: MALDIpqi
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Estimate Parchment Quality Index from MALDI-TOF datasets
+Version: 0.0.1
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Ismael", "Rodriguez", , "ismael@palaeome.org", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-5313-9709"))
+    person("Carsten", "Wiuf", , "wiuf@math.ku.dk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-1302-4445"))
+Description: It uses weighted least squares to deconvolute isotopic envelopes and calculate
+             deamidation level for a selection of peptides, from parchment sample triplicates.
+             A linear mixed effects model is then used to integrate the values into a
+             single Parchment Quality Index per sample.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
+Imports: 
+    MALDIutils,
+    MALDIquant,
+    bacollite,
+    readr,
+    ggplot2,
+    ggpubr,
+    functional,
+    nlme,
+    tibble,
+    dplyr,
+    magrittr,
+    tidyr,
+    utils,
+    stringr,
+    stats
