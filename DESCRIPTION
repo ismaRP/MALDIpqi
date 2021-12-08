@@ -1,5 +1,5 @@
-Package: MALDIpqi
-Title: Estimate Parchment Quality Index from MALDI-TOF datasets
+Package: MALDIpdi
+Title: Estimate Parchment Deamidation Index from MALDI-TOF datasets
 Version: 0.0.1
 Authors@R: 
     person("Ismael", "Rodriguez", , "ismael@palaeome.org", role = c("aut", "cre"),
@@ -9,7 +9,7 @@ Authors@R:
 Description: It uses weighted least squares to deconvolute isotopic envelopes and calculate
              deamidation level for a selection of peptides, from parchment sample triplicates.
              A linear mixed effects model is then used to integrate the values into a
-             single Parchment Quality Index per sample.
+             single Parchment Deamidation Index per sample.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -30,4 +30,7 @@ Imports:
     tidyr,
     utils,
     stringr,
-    stats
+    stats,
+    data.table
+URL: https://github.com/ismaRP/MALDIpdi
+BugReports: https://github.com/ismaRP/MALDIpdi/issues
