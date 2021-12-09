@@ -19,7 +19,7 @@
 #' @export
 #'
 #' @examples
-lme_pqi = function(q2e, peptides, outdir=NULL, n_isopeaks=5, g="free"){
+lme_pdi = function(q2e, peptides, outdir=NULL, n_isopeaks=5, g="free"){
 
   pept_names = pull(peptides, 1)
   pept_labels = pull(peptides, 6)
@@ -105,12 +105,12 @@ lme_pqi = function(q2e, peptides, outdir=NULL, n_isopeaks=5, g="free"){
       estimates_m))
 
   ## here I have added untransformed and transformed prediction from both the model and function
-  ## Prediction & PQI.PredictSample => from the function
-  ## RanefModel & PQI.Model => from the model
+  ## Prediction & PDI.PredictSample => from the function
+  ## RanefModel & PDI.Model => from the model
   q2e_m_pred = q2e_m_pred %>%
     mutate(RanefModel=ranef(m)[["Sample"]][,1],
-           PQI.Model=exp(RanefModel),
-           PQI.PredictSample=exp(Prediction),
+           PDI.Model=exp(RanefModel),
+           PDI.PredictSample=exp(Prediction),
            Sample = as.character(Sample))
 
   if (!is.null(outdir)){
@@ -118,13 +118,13 @@ lme_pqi = function(q2e, peptides, outdir=NULL, n_isopeaks=5, g="free"){
       q2e_m,
       file.path(
         outdir,
-        sprintf('PQI_pep_estimates_gamma%3.3f.csv', estimates_m$gamma))
+        sprintf('PDI_pep_estimates_gamma%3.3f.csv', estimates_m$gamma))
     )
     write_csv(
       q2e_m_pred,
       file.path(
         outdir,
-        sprintf('PQI_sample_estimates_gamma%3.3f.csv', estimates_m$gamma))
+        sprintf('PDI_sample_estimates_gamma%3.3f.csv', estimates_m$gamma))
     )
   }
 
@@ -160,7 +160,7 @@ plot_q = function(q2e, peptides){
       labeller = labeller(Peptides=as_labeller(pept_labels, label_parsed))) +
     xlab("q") +
     ggtitle("q WLS per peptide estimate") +
-    theme(plot.title = element_text(size=6))
+    theme(plot.title = element_text(size=10))
 
   return(q_hist)
 }
@@ -169,7 +169,7 @@ plot_q = function(q2e, peptides){
 
 #' Title
 #'
-#' @param pqi_m
+#' @param pdi_m
 #' @param tit
 #'
 #' @return
@@ -178,11 +178,15 @@ plot_q = function(q2e, peptides){
 #' @export
 #'
 #' @examples
-pept_qqplot = function(pqi_m, tit=""){
-  qq_plot = ggplot(pqi_m) +
+pept_qqplot = function(pdi_m, tit=""){
+  qq_plot = ggplot(pdi_m) +
     geom_qq(aes(sample=Res, color=Peptides)) +
     geom_qq_line(aes(sample=Res, color=Peptides)) +
-    facet_wrap(~Peptides, scales="free_y") +
+    facet_wrap(~Peptides, scales="free") +
+    theme(legend.key.size=unit(1, "cm"),
+          legend.text = element_text(size = 15),
+          strip.text = element_text(size = 15)) +
+    guides(colour = guide_legend(override.aes = list(size=4))) +
     ylab("quantiles of standardized residuals") +
     xlab("quantiles of standard normal") +
     ggtitle(tit)
@@ -191,7 +195,7 @@ pept_qqplot = function(pqi_m, tit=""){
 
 #' Title
 #'
-#' @param pqi_m
+#' @param pdi_m
 #' @param tit
 #'
 #' @return
@@ -200,12 +204,17 @@ pept_qqplot = function(pqi_m, tit=""){
 #' @export
 #'
 #' @examples
-fvsr = function(pqi_m, tit=""){
-  fvsr_plot = ggplot(pqi_m) +
-    geom_point(aes(x=exp(Fitted), y=Res, color=Peptides)) +
-    facet_wrap(~Peptides, scales="free_y") +
+fvsr = function(pdi_m, tit=""){
+  fvsr_plot = ggplot(pdi_m) +
+    geom_point(aes(x=exp(Fitted), y=Res, color=Peptides),
+               size=2.5, alpha=0.8) +
+    facet_wrap(~Peptides, scales="free") +
     ylab("standardized residuals") +
     xlab("predicted q peptide") +
+    theme(legend.key.size=unit(1, "cm"),
+          legend.text = element_text(size = 15),
+          strip.text = element_text(size = 15)) +
+    guides(colour = guide_legend(override.aes = list(size=4))) +
     ggtitle(tit)
   return(fvsr_plot)
 }

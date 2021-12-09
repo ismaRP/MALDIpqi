@@ -20,7 +20,7 @@ predict_sample(Sample, Replicates, Peptides, Reliability, Logq, pars)
 }}
 }
 \value{
-tibble with predicted sample PQI and standard deviation
+tibble with predicted sample PDI and standard deviation
 }
 \description{
 Title

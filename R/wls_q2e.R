@@ -223,16 +223,10 @@ wls_q2e = function(peptides, data_list=NULL, indir=NULL,
                          'sample', 'peptide')
     q2e_estimates[[p]] = df_out
   }
+  q2e_estimates = bind_rows(q2e_estimates)
   if (!is.null(outdir)){
-    invisible(lapply(
-      q2e_estimates,
-      function(x){
-        m = x$peptide[1]
-        file_name <- file.path(outdir, paste("WLS_peptide_", m, ".txt"))
-        write_csv(x, file=file_name, col_names=T, append=F)
-      }
-    ))
+    write_csv(q2e_estimates, file.path(outdir, "wls_q2e.csv"))
   }
-  return(bind_rows(q2e_estimates))
+  return(q2e_estimates)
 }
 

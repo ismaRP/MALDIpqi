@@ -120,7 +120,7 @@ LSest = function(X, data, weight) {
 #'     \item{gamma}{estimate for half power on Reliability}
 #'     \item{sigma2}{estimate for variance for on the different peptides. This should be a named vector.}
 #'}
-#' @return tibble with predicted sample PQI and standard deviation
+#' @return tibble with predicted sample PDI and standard deviation
 #' @export
 #' @importFrom tibble tibble
 #' @examples

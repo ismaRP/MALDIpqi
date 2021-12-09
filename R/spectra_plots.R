@@ -91,7 +91,7 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
 #'
 #' @examples
 plot_pept_spectra = function(indir,
-                             spectra,
+                             spectra_names,
                              readf,
                              peptides=NULL,
                              n_isopeaks = 6,
@@ -118,7 +118,7 @@ plot_pept_spectra = function(indir,
          }
   )
 
-  spectra_names = read_lines(spectra)
+  # spectra_names = read_lines(spectra)
 
   if (is.null(ncores)){
     ncores = detectCores() - 2

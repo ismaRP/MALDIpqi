@@ -6,7 +6,7 @@
 \usage{
 plot_pept_spectra(
   indir,
-  spectra,
+  spectra_names,
   readf,
   peptides = NULL,
   n_isopeaks = 6,
