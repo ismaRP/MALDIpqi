@@ -7,7 +7,10 @@
 preprocess_spectra(s, ...)
 }
 \arguments{
-\item{...}{}
+\item{s}{\code{\link[MALDIquant]{MassSpectrum}} object}
+
+\item{...}{Parameters passed to the different preprocessing functions.
+See \code{\link{preprocess_data}}}
 }
 \value{
 peaks list, with mass, intensity and s2n

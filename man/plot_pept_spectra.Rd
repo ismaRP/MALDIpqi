@@ -9,21 +9,54 @@ plot_pept_spectra(
   spectra_names,
   readf,
   peptides = NULL,
-  n_isopeaks = 6,
-  min_isopeaks = 4,
-  tol = 0.00015,
+  smooth_method = c("SavitzkyGolay", "Wavelet"),
+  thresh.scale = 2.5,
+  hws_smooth = 8,
   iter = 20,
-  hws_smooth = 20,
   hws_peak = 20,
   snr = 0,
-  ncores = NULL
+  n_isopeaks = 5,
+  min_isopeaks = 4,
+  tol = 0.00015
 )
 }
 \arguments{
-\item{ncores}{}
+\item{indir}{Folder containing spectra.}
+
+\item{spectra_names}{Character vector. Spectra names to plot}
+
+\item{readf}{A string value. choose function to use to read spectra.
+Currently restricted to one of "fread", "table" or "mzml"}
+
+\item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
+peptide number or ID, name, and m/z. IF NULL}
+
+\item{smooth_method}{Smootherning method, one of "SavitzkyGolay" or "Wavelet".
+SavitzkyGolay uses \code{\link[MALDIquant]{smoothIntensity}} together with
+\code{hws_smooth} parameter
+Wavelet uses \code{\link[MALDIrppa]{wavSmoothing}} together with
+\code{thresh.scale}}
+
+\item{thresh.scale}{Smoothing factor for wavelet-based smoothing. Passed to \code{\link[MALDIrppa]{wavSmoothing}}}
+
+\item{hws_smooth}{Half-window size parameter for smoothening. Passed to \code{\link[MALDIquant]{smoothIntensity}}}
+
+\item{iter}{Iterations parameter for baseline detection. Passed to \code{\link[MALDIquant]{estimateBaseline}}}
+
+\item{hws_peak}{Half-window size parameter for local maximum detection. Passed to \code{\link[MALDIquant]{detectPeaks}}}
+
+\item{snr}{Signal to noise threshold for peak detection. Passed to \code{\link[MALDIquant]{detectPeaks}}}
+
+\item{n_isopeaks}{Number of isotopic peaks to pick. Default is 5 and the maximum permitted.}
+
+\item{min_isopeaks}{If less than min_isopeaks consecutive (about 1 Da difference) isotopic peaks
+are detected, the whole isotopic envelope is discarded. Default is 4}
+
+\item{tol}{Tolerance factor for matching detected peaks to theoretical isotopic distribution.
+Value used is m/z of monoisotopic peak * \code{tol}.}
 }
 \value{
-
+ggplot with raw nd preprocessed spectra
 }
 \description{
 Title

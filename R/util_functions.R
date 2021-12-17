@@ -1,7 +1,4 @@
 
-###################
-# Hidden functions #
-###################
 
 # Read sample
 #' Title

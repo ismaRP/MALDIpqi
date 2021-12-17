@@ -6,6 +6,8 @@ Authors@R:
            comment = c(ORCID = "0000-0001-5313-9709"))
     person("Carsten", "Wiuf", , "wiuf@math.ku.dk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1302-4445"))
+    person("Bharath", "Nair", , "bharath@palaeome.org", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-1897-4132"))
 Description: It uses weighted least squares to deconvolute isotopic envelopes and calculate
              deamidation level for a selection of peptides, from parchment sample triplicates.
              A linear mixed effects model is then used to integrate the values into a
@@ -31,6 +33,9 @@ Imports:
     utils,
     stringr,
     stats,
-    data.table
+    data.table,
+    MALDIrppa
 URL: https://github.com/ismaRP/MALDIpdi
 BugReports: https://github.com/ismaRP/MALDIpdi/issues
+Depends: 
+    R (>= 2.10)

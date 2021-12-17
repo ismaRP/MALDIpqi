@@ -92,7 +92,10 @@ extractPeaks = function(x, ...){
 #' Title
 #'
 #' @param s
+#' \code{\link[MALDIquant]{MassSpectrum}} object
 #' @param ...
+#' Parameters passed to the different preprocessing functions.
+#' See \code{\link{preprocess_data}}
 #'
 #' @return peaks list, with mass, intensity and s2n
 #' @importFrom MALDIquant smoothIntensity removeBaseline detectPeaks
@@ -101,8 +104,9 @@ extractPeaks = function(x, ...){
 #' @examples
 preprocess_spectra = function(s, ...){
   prep_args = list(...)
-  s = smoothIntensity(s, method="SavitzkyGolay",
-                      halfWindowSize=prep_args$hws_smooth)
+  # s = smoothIntensity(s, method="SavitzkyGolay",
+  #                     halfWindowSize=prep_args$hws_smooth)
+  s = prep_args$sm(s)
   s = removeBaseline(s, method='SNIP', iterations=prep_args$iter)
   # Estimate noise
   p = detectPeaks(
@@ -116,24 +120,64 @@ preprocess_spectra = function(s, ...){
 
 
 
+
 #' preprocess_data
 #'
-#' @param indir
-#' @param peptides
-#' @param readf
-#' @param outdir
-#' @param chunks
-#' @param n_isopeaks
-#' @param min_isopeaks
-#' @param snr
-#' @param tol
-#' @param iter
-#' @param hws_smooth
-#' @param hws_peak
-#' @param ncores
+#' Performs smoothening, baseline removal and peak detection on MALDI samples.
 #'
-#' @return A list of mass-intensity-s2n peak
+#' @param indir Folder containing spectra.
+#' @param peptides
+#' A dataframe with peptide information. It must contain at least 3 columns,
+#' peptide number or ID, name, and m/z. IF NULL
+#' @param readf
+#' A string value. choose function to use to read spectra.
+#' Currently restricted to one of "fread", "table" or "mzml"
+#' @param outdir
+#' Folder where one peaks file for each sample should be written.
+#' If NULL (default), no files are written.
+#' @param chunks
+#' Number of chunks all the spectra should be divided into for reading and
+#' processing. If all spectra is loaded and processed at once, i.e. chunks=1,
+#' it can overload RAM memory. If chunks>1 data is loaded and processed to the
+#' much lighter list of peaks in chunks batches.
+#' @param smooth_method
+#' Smootherning method, one of "SavitzkyGolay" or "Wavelet".
+#' SavitzkyGolay uses \code{\link[MALDIquant]{smoothIntensity}} together with
+#' \code{hws_smooth} parameter
+#' Wavelet uses \code{\link[MALDIrppa]{wavSmoothing}} together with
+#' \code{thresh.scale}
+#'
+#' @param thresh.scale
+#' Smoothing factor for wavelet-based smoothing. Passed to \code{\link[MALDIrppa]{wavSmoothing}}
+#' @param hws_smooth
+#' Half-window size parameter for smoothening. Passed to \code{\link[MALDIquant]{smoothIntensity}}
+#' @param iter
+#' Iterations parameter for baseline detection. Passed to \code{\link[MALDIquant]{estimateBaseline}}
+#' @param hws_peak
+#' Half-window size parameter for local maximum detection. Passed to \code{\link[MALDIquant]{detectPeaks}}
+#' @param snr
+#' Signal to noise threshold for peak detection. Passed to \code{\link[MALDIquant]{detectPeaks}}
+#' @param tol
+#' Tolerance factor for matching detected peaks to theoretical isotopic distribution.
+#' Value used is m/z of monoisotopic peak * \code{tol}.
+#' @param n_isopeaks
+#' Number of isotopic peaks to pick. Default is 5 and the maximum permitted.
+#' @param min_isopeaks
+#' If less than min_isopeaks consecutive (about 1 Da difference) isotopic peaks
+#' are detected, the whole isotopic envelope is discarded. Default is 4
+#' @param ncores
+#' Number of cores used for the preprocessing of spectra. The cores will work in
+#' parallel with the different spectra within a chunk.
+#' @param iocores
+#' Number of cores used for I/O operations. For some systems I/O operations involving
+#' multiple cores reading or writing at the same time from disk increases time.
+#'
+#' @return A list of dataframes, 1 per sample. Each dataframe has 3 columns,
+#' m/z, intensity and signal-to-noise ratio for each of the n_isopeaks from each
+#' peptide.
+#'
 #' @importFrom MALDIutils importTsv importTable import_file.MzMl
+#' @importFrom MALDIrppa wavSmoothing
 #' @importFrom parallel mcmapply detectCores mclapply
 #' @importFrom readr write_tsv
 #' @importFrom dplyr pull
@@ -142,18 +186,21 @@ preprocess_spectra = function(s, ...){
 #'
 #' @examples
 preprocess_data = function(indir,
-                           readf,
+                           readf = c("fread", "table", "mzml"),
                            peptides=NULL,
                            outdir = NULL,
                            chunks = 50,
-                           n_isopeaks = 6,
-                           min_isopeaks = 4,
+                           smooth_method= c ("SavitzkyGolay","Wavelet"),
+                           thresh.scale = 2.5,
+                           hws_smooth = 20,
+                           iter = 20,
+                           hws_peak = 20,
                            snr = 0,
                            tol = 1.5e-4,
-                           iter = 20,
-                           hws_smooth = 20,
-                           hws_peak = 20,
-                           ncores = NULL){
+                           n_isopeaks = 6,
+                           min_isopeaks = 4,
+                           ncores = NULL,
+                           iocores = 1){
   if (is.null(ncores)){
     ncores = detectCores() - 2
   } else {
@@ -161,7 +208,7 @@ preprocess_data = function(indir,
   }
 
   cat("Using ", ncores, " cores")
-
+  readf = match.arg(readf)
   switch(EXPR=readf,
          "fread" = {
            fmt = ".tab"
@@ -178,19 +225,36 @@ preprocess_data = function(indir,
          }
   )
 
+  smooth_method = match.arg(smooth_method)
+  switch(EXPR=smooth_method,
+          "Wavelet" = {
+            sm = function(thresh.scale){
+              function(x) wavSmoothing(list(x), "Wavelet", thresh.scale)[[1]]
+            }
+            sm = sm(thresh.scale)
+          },
+          "SavitzkyGolay" = {
+            sm = function(hws_smooth){
+              function(x) smoothIntensity(x, "SavitzkyGolay", hws_smooth)
+            }
+            sm = sm(hws_smooth)
+          }
+  )
+
   if (is.null(peptides)) {
-    masses = c(
-      1105.58, 2019.95, 2040.97, 2689.25,
-      3033.50, 3093.48, 3084.42, 3116.40
-    )
-    pept_names = c(
-      'COL1a1 508-519', 'COL1a1 270-291', 'COL1a1 375-396', 'COL1a1 934-963',
-      'COL1a2 756-789', 'COL1a2 756-789 p', 'COL1a1 9-42', 'COL1a1 9-42 p'
-    )
-  } else {
-    pept_names = pull(peptides, 2)
-    masses = pull(peptides, 3)
+    peptides = load("data/peptides.rda")
+    # masses = c(
+    #   1105.58, 2019.95, 2040.97, 2689.25,
+    #   3033.50, 3093.48, 3084.42, 3116.40
+    # )
+    # pept_names = c(
+    #   'COL1a1 508-519', 'COL1a1 270-291', 'COL1a1 375-396', 'COL1a1 934-963',
+    #   'COL1a2 756-789', 'COL1a2 756-789 p', 'COL1a1 9-42', 'COL1a1 9-42 p'
+    # )
   }
+  pept_names = pull(peptides, 2)
+  masses = pull(peptides, 3)
+
   npepts = length(masses)
   spectra_f = list.files(indir)
 
@@ -221,17 +285,18 @@ preprocess_data = function(indir,
         print(sprintf('Chunk %i of %i', ch, chunks))
       }
       infiles = file.path(indir, x)
-      l = mclapply(
+      l = lapply(
         infiles,
-        read_f,
-        mc.cores=ncores
+        read_f
+        # mc.cores=iocores,
+        # mc.silent=T
       )
       names(l) = x
       invisible(mcmapply(
         preprocess_spectra, l,
         MoreArgs = list(
           tol=tol, n_isopeaks=n_isopeaks, min_isopeaks=min_isopeaks, snr=snr,
-          hws_smooth=hws_smooth, iter=iter, hws_peak=hws_peak, masses=masses),
+          sm=sm, iter=iter, hws_peak=hws_peak, masses=masses),
         mc.cores=ncores, SIMPLIFY = F
       ))
     },

@@ -182,7 +182,8 @@ pept_qqplot = function(pdi_m, tit=""){
   qq_plot = ggplot(pdi_m) +
     geom_qq(aes(sample=Res, color=Peptides)) +
     geom_qq_line(aes(sample=Res, color=Peptides)) +
-    facet_wrap(~Peptides, scales="free") +
+    # facet_wrap(~Peptides, scales="free") +
+    facet_wrap(~Peptides) +
     theme(legend.key.size=unit(1, "cm"),
           legend.text = element_text(size = 15),
           strip.text = element_text(size = 15)) +
@@ -208,7 +209,8 @@ fvsr = function(pdi_m, tit=""){
   fvsr_plot = ggplot(pdi_m) +
     geom_point(aes(x=exp(Fitted), y=Res, color=Peptides),
                size=2.5, alpha=0.8) +
-    facet_wrap(~Peptides, scales="free") +
+    # facet_wrap(~Peptides, scales="free") +
+    facet_wrap(~Peptides) +
     ylab("standardized residuals") +
     xlab("predicted q peptide") +
     theme(legend.key.size=unit(1, "cm"),
