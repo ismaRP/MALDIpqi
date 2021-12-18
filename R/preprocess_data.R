@@ -285,11 +285,11 @@ preprocess_data = function(indir,
         print(sprintf('Chunk %i of %i', ch, chunks))
       }
       infiles = file.path(indir, x)
-      l = lapply(
+      l = mclapply(
         infiles,
-        read_f
-        # mc.cores=iocores,
-        # mc.silent=T
+        read_f,
+        mc.cores=iocores,
+        mc.silent=T
       )
       names(l) = x
       invisible(mcmapply(
