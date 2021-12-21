@@ -139,6 +139,7 @@ plot_pept_spectra = function(indir,
          }
   )
 
+  smooth_method = match.arg(smooth_method)
   switch(EXPR=smooth_method,
          "Wavelet" = {
            sm = function(thresh.scale){
