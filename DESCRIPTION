@@ -1,5 +1,5 @@
-Package: MALDIpdi
-Title: Estimate Parchment Deamidation Index from MALDI-TOF datasets
+Package: MALDIpqi
+Title: Estimate Parchment Glutamine Index from MALDI-TOF datasets
 Version: 0.0.1
 Authors@R: 
     person("Ismael", "Rodriguez", , "ismael@palaeome.org", role = c("aut", "cre"),
@@ -9,9 +9,9 @@ Authors@R:
     person("Bharath", "Nair", , "bharath@palaeome.org", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1897-4132"))
 Description: It uses weighted least squares to deconvolute isotopic envelopes and calculate
-             deamidation level for a selection of peptides, from parchment sample triplicates.
+             glutamine deamidation level for a selection of peptides, from parchment sample triplicates.
              A linear mixed effects model is then used to integrate the values into a
-             single Parchment Deamidation Index per sample.
+             single Parchment Glutamine Index (PQI) per sample.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -35,7 +35,7 @@ Imports:
     stats,
     data.table,
     MALDIrppa
-URL: https://github.com/ismaRP/MALDIpdi
-BugReports: https://github.com/ismaRP/MALDIpdi/issues
+URL: https://github.com/ismaRP/MALDIpqi
+BugReports: https://github.com/ismaRP/MALDIpqi/issues
 Depends: 
     R (>= 2.10)

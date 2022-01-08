@@ -1,19 +1,19 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# MALDIpdi
+# MALDIpqi
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of MALDIpdi is to …
+The goal of MALDIpqi is to …
 
 ## Installation
 
-You can install the released version of MALDIpdi from github with:
+You can install the released version of MALDIpqi from github with:
 
 ``` r
-install.github("ismaRP/MALDIpdi")
+install.github("ismaRP/MALDIpqi")
 ```
 
 ## Example
@@ -21,6 +21,6 @@ install.github("ismaRP/MALDIpdi")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(MALDIpdi)
+library(MALDIpqi)
 ## basic example code
 ```
