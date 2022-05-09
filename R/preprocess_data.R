@@ -171,7 +171,8 @@ preprocess_spectra = function(s, ...){
 #' @param iocores
 #' Number of cores used for I/O operations. For some systems I/O operations involving
 #' multiple cores reading or writing at the same time from disk increases time.
-#'
+#' @param sep
+#' Separator character for txt spectra files
 #' @return A list of dataframes, 1 per sample. Each dataframe has 3 columns,
 #' m/z, intensity and signal-to-noise ratio for each of the n_isopeaks from each
 #' peptide.
@@ -187,6 +188,7 @@ preprocess_spectra = function(s, ...){
 #' @examples
 preprocess_data = function(indir,
                            readf = c("fread", "table", "mzml"),
+                           sep="\t",
                            peptides=NULL,
                            outdir = NULL,
                            chunks = 50,
@@ -212,7 +214,12 @@ preprocess_data = function(indir,
   switch(EXPR=readf,
          "fread" = {
            fmt = ".tab"
-           read_f = importTsv
+           read_f = function(sep){
+             function(x){
+               importTsv(f=x, sep=sep)
+             }
+           }
+           read_f = read_f(sep=sep)
          },
          "table" = {
            fmt = ".tab"

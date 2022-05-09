@@ -7,6 +7,7 @@
 preprocess_data(
   indir,
   readf = c("fread", "table", "mzml"),
+  sep = "\\t",
   peptides = NULL,
   outdir = NULL,
   chunks = 50,
@@ -28,6 +29,8 @@ preprocess_data(
 
 \item{readf}{A string value. choose function to use to read spectra.
 Currently restricted to one of "fread", "table" or "mzml"}
+
+\item{sep}{Separator character for txt spectra files}
 
 \item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
 peptide number or ID, name, and m/z. IF NULL}
