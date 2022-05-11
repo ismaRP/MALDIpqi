@@ -2,9 +2,19 @@
 % Please edit documentation in R/preprocess_data.R
 \name{preprocess_spectra}
 \alias{preprocess_spectra}
-\title{Title}
+\title{preprocess_spectra}
 \usage{
-preprocess_spectra(s, ...)
+preprocess_spectra(
+  s,
+  smoothf,
+  iterations,
+  halfWindowSize,
+  SNR,
+  masses,
+  tol,
+  n_isopeaks,
+  min_isopeaks
+)
 }
 \arguments{
 \item{s}{\code{\link[MALDIquant]{MassSpectrum}} object}
@@ -16,5 +26,5 @@ See \code{\link{preprocess_data}}}
 peaks list, with mass, intensity and s2n
 }
 \description{
-Title
+preprocess_spectra
 }
