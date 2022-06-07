@@ -14,13 +14,14 @@
 #' @param n_isopeaks
 #' @param min_isopeaks
 #' @param tol
+#' @param normalize
 #'
 #' @return
 #' @importFrom MALDIquant match.closest as.matrix
 #' @importFrom tibble tibble
 #' @examples
 plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
-                              n_isopeaks, min_isopeaks, tol){
+                              n_isopeaks, min_isopeaks, tol, normalize){
   s = as.matrix(s)
   s_br = as.matrix(s_br)
   p  = as.matrix(p)
@@ -31,8 +32,18 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
   mz = s[sel, 1]
   int = s[sel, 2]
   b = baseline[sel]
+
   br = s_br[sel, 2]
   n = noise[sel]
+
+  if (normalize){
+    tot_int = sum(br)
+    int = int / tot_int
+    b = b / tot_int
+
+    br = br / tot_int
+    n = n / tot_int
+  }
 
   p = p[p[,1] > m[1]-0.5 & p[,1] < m[1]+n_isopeaks-0.5, 1]
 
@@ -69,6 +80,8 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
 #' @param peptides
 #' A dataframe with peptide information. It must contain at least 3 columns,
 #' peptide number or ID, name, and m/z. IF NULL
+#' @param normalize Logical. Whether intensity hsould be normalized divinding by
+#' the total intensity for each peptide peaks range. DEfault is False
 #' @param readf
 #' A string value. choose function to use to read spectra.
 #' Currently restricted to one of "fread", "table" or "mzml"
@@ -78,7 +91,6 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
 #' \code{hws_smooth} parameter
 #' Wavelet uses \code{\link[MALDIrppa]{wavSmoothing}} together with
 #' \code{thresh.scale}
-#'
 #' @param thresh.scale
 #' Smoothing factor for wavelet-based smoothing. Passed to \code{\link[MALDIrppa]{wavSmoothing}}
 #' @param hws_smooth
@@ -114,6 +126,7 @@ plot_pept_spectra = function(indir,
                              spectra_names,
                              readf,
                              peptides=NULL,
+                             normalize=F,
                              smooth_method = c("SavitzkyGolay", "Wavelet"),
                              thresh.scale = 2.5,
                              hws_smooth = 8,
@@ -225,7 +238,7 @@ plot_pept_spectra = function(indir,
         s_name = s_name,
         n_isopeaks = n_isopeaks,
         min_isopeaks = min_isopeaks,
-        tol=tol),
+        tol=tol, normalize=normalize),
       SIMPLIFY = FALSE
     )
     spectra_df = bind_rows(spectra_df)
