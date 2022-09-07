@@ -2,16 +2,15 @@
 % Please edit documentation in R/lme_pqi.R
 \name{pept_qqplot}
 \alias{pept_qqplot}
-\title{Title}
+\title{Quantile-Quantile plots of the linear mixed effect estimates per peptide}
 \usage{
-pept_qqplot(pqi_m, tit = "")
+pept_qqplot(pqi_m, title = "")
 }
 \arguments{
-\item{tit}{}
-}
-\value{
+\item{pqi_m}{data.frame of model estimates per replicate and peptide}
 
+\item{title}{Plot title}
 }
 \description{
-Title
+Quantile-Quantile plots of the linear mixed effect estimates per peptide
 }

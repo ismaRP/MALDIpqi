@@ -2,13 +2,14 @@
 % Please edit documentation in R/preprocess_data.R
 \name{getIsoPeaks}
 \alias{getIsoPeaks}
-\title{getIsoPeaks}
+\title{Preprocessing spectra for q2e estimation}
 \usage{
 getIsoPeaks(
   indir,
   readf = c("fread", "table", "mzml"),
   sep = "\\t",
   peptides = NULL,
+  spectra = NULL,
   outdir = NULL,
   chunks = 50,
   smooth_method = c("SavitzkyGolay", "Wavelet"),
@@ -21,7 +22,8 @@ getIsoPeaks(
   n_isopeaks = 6,
   min_isopeaks = 4,
   ncores = NULL,
-  iocores = 1
+  iocores = 1,
+  vch = 10
 )
 }
 \arguments{
@@ -33,7 +35,7 @@ Currently restricted to one of "fread", "table" or "mzml"}
 \item{sep}{Separator character for txt spectra files}
 
 \item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
-peptide number or ID, name, and m/z. IF NULL}
+peptide number or ID, name, and m/z. IF NULL, default are used, see details.}
 
 \item{outdir}{Folder where one peaks file for each sample should be written.
 If NULL (default), no files are written.}
@@ -76,8 +78,12 @@ multiple cores reading or writing at the same time from disk increases time.}
 \value{
 A list of dataframes, 1 per sample. Each dataframe has 3 columns,
 m/z, intensity and signal-to-noise ratio for each of the n_isopeaks from each
-peptide.
+peptide. Missing peaks are NAs.
 }
 \description{
 Performs smoothening, baseline removal and peak detection on MALDI samples.
+From the peaks, isotopic peaks for a list of peptides are extracted.
+}
+\details{
+The default peptides are the ones from Nair et al. (2022) \url{https://www.biorxiv.org/content/10.1101/2022.03.13.483627v5.full.pdf}
 }

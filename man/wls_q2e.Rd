@@ -2,10 +2,10 @@
 % Please edit documentation in R/wls_q2e.R
 \name{wls_q2e}
 \alias{wls_q2e}
-\title{Title}
+\title{Estimation of peptide q2e}
 \usage{
 wls_q2e(
-  peptides,
+  peptides = NULL,
   data_list = NULL,
   indir = NULL,
   n_isopeaks = 5,
@@ -13,11 +13,22 @@ wls_q2e(
 )
 }
 \arguments{
-\item{outdir}{}
+\item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
+peptide number or ID, name, and m/z. IF NULL, default are used, see details.}
+
+\item{data_list}{list of isopeaks obtained from getIsoPeaks}
+
+\item{indir}{Path to lsit of isopeaks file is it was saved in a file}
+
+\item{n_isopeaks}{Number of isotopic peaks in isopeaks list}
+
+\item{outdir}{Optional file were weighte least square estimates of q2e are saved}
 }
 \value{
-
+A data.frame with gamma and q2e estimates and
+minimum least square value of the estimate per sample, replicate and peptide
 }
 \description{
-Title
+Given a list of tables, each contaning the peptide isotopic peaks per samples,
+this function uses weighted least squares to estimate q2e
 }

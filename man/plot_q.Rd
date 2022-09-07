@@ -2,16 +2,16 @@
 % Please edit documentation in R/lme_pqi.R
 \name{plot_q}
 \alias{plot_q}
-\title{Title}
+\title{Plot distribution of q2e values per peptide}
 \usage{
 plot_q(q2e, peptides)
 }
 \arguments{
-\item{peptides}{}
-}
-\value{
+\item{q2e}{data.frame with q2e estimations per sample, replicate and peptide}
 
+\item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
+peptide number or ID, name, and m/z. IF NULL, default are used, see details.}
 }
 \description{
-Title
+Plot distribution of q2e values per peptide
 }

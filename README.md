@@ -6,7 +6,17 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of MALDIpqi is to …
+MALDIpqi calculates Parchment Glutamine Index from MALDI TOF ZooMS data.
+It is a sample level measure of the glutamine deamidation from a list of
+peptides.
+
+For details in the data processing and mathematical method and models to
+estimate PQI, refer to our publication Nair et al. (2022)
+
+The method was initially developed to estimate parchment quality based
+on deamidation, following some ideas from Wilson et al. (2012). However,
+it can be applied in other tissues as in van Doorn et al. (2012) or
+Brown et al. (2021)
 
 ## Installation
 
@@ -16,11 +26,46 @@ You can install the released version of MALDIpqi from github with:
 install.github("ismaRP/MALDIpqi")
 ```
 
+## References
+
+Nair, B. et al. (2022) ‘Parchment Glutamine Index (PQI): A novel method
+to estimate glutamine deamidation levels in parchment collagen obtained
+from low-quality MALDI-TOF data’, bioRxiv.
+<doi:10.1101/2022.03.13.483627>.
+
+Wilson, J., van Doorn, N.L. and Collins, M.J. (2012) ‘Assessing the
+extent of bone degradation using glutamine deamidation in collagen’,
+Analytical chemistry, 84(21), pp. 9041–9048.
+
+van Doorn, N.L. et al. (2012) ‘Site-specific deamidation of glutamine: a
+new marker of bone collagen deterioration’, Rapid communications in mass
+spectrometry: RCM, 26(19), pp. 2319–2327.
+
+Brown, S. et al. (2021) ‘Examining collagen preservation through
+glutamine deamidation at Denisova Cave’, Journal of archaeological
+science, 133, p. 105454.
+
 ## Example
 
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(MALDIpqi)
-## basic example code
+
+data_folder = "data/mzML"
+results_folder = "results_test"
+
+iso_peaks = getIsoPeaks(
+  indir=data_folder, outdir=NULL, readf="mzml",
+  peptides = NULL, chunks = 50, n_isopeaks = 5, min_isopeaks = 4,
+  smooth_method = "SavitzkyGolay", hws_smooth = 8, hws_peak = 20, snr = 1.5)
+
+
+q2e = wls_q2e(peptides = NULL, n_isopeaks = 5,
+              data_list = iso_peaks, outdir=results_folder)
+
+res_free_gamma = lme_pdi(q2e, peptides=NULL, outdir=results_folder,
+                         n_isopeaks=5, g="free")
+res_fixed_gamma = lme_pdi(q2e, peptides=NULL, outdir=results_folder,
+                          n_isopeaks=5, g=-1/2)
 ```

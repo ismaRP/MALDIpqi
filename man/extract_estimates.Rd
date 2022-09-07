@@ -9,9 +9,6 @@ extract_estimates(m, q_data)
 \arguments{
 \item{q_data}{}
 }
-\value{
-
-}
 \description{
 Title
 }

@@ -9,9 +9,6 @@ peptide_labeller(values)
 \arguments{
 \item{values}{}
 }
-\value{
-
-}
 \description{
 Title
 }

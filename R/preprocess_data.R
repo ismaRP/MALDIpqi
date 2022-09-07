@@ -1,39 +1,5 @@
 
 
-
-#' Title
-#'
-#' @param x
-#' @param n
-#'
-#' @return n list of vectos
-#' @export
-#'
-#' @examples
-chunks = function(x,n){
-  split(x, cut(seq_along(x), n, labels = FALSE))
-}
-
-#' Title
-#'
-#' @param x
-#' @param indir
-#'
-#' @return TRUE of FALSE for file not being empty
-#'
-#' @examples
-detect_empty = function(x, indir){
-  f = file.path(indir, x)
-  t = readLines(f, 1)
-  if (length(t)>0) {
-    return(TRUE)
-  } else {
-    return(FALSE)
-  }
-}
-
-
-
 #' preprocess_spectra
 #'
 #' @param s
@@ -64,14 +30,15 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 
 
 
-#' getIsoPeaks
+#' Preprocessing spectra for q2e estimation
 #'
 #' Performs smoothening, baseline removal and peak detection on MALDI samples.
+#' From the peaks, isotopic peaks for a list of peptides are extracted.
 #'
 #' @param indir Folder containing spectra.
 #' @param peptides
 #' A dataframe with peptide information. It must contain at least 3 columns,
-#' peptide number or ID, name, and m/z. IF NULL
+#' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
 #' @param readf
 #' A string value. choose function to use to read spectra.
 #' Currently restricted to one of "fread", "table" or "mzml"
@@ -117,7 +84,7 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 #' Separator character for txt spectra files
 #' @return A list of dataframes, 1 per sample. Each dataframe has 3 columns,
 #' m/z, intensity and signal-to-noise ratio for each of the n_isopeaks from each
-#' peptide.
+#' peptide. Missing peaks are NAs.
 #'
 #' @importFrom MALDIutils preprocessData prepFun
 #' @importFrom MALDIrppa wavSmoothing
@@ -125,13 +92,14 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 #' @importFrom readr write_tsv
 #' @importFrom dplyr pull
 #' @export
-#'
+#' @details The default peptides are the ones from Nair et al. (2022) <https://www.biorxiv.org/content/10.1101/2022.03.13.483627v5.full.pdf>
 #'
 #' @examples
 getIsoPeaks = function(indir,
                        readf = c("fread", "table", "mzml"),
                        sep="\t",
                        peptides=NULL,
+                       spectra=NULL,
                        outdir = NULL,
                        chunks = 50,
                        smooth_method = c("SavitzkyGolay","Wavelet"),
@@ -144,7 +112,8 @@ getIsoPeaks = function(indir,
                        n_isopeaks = 6,
                        min_isopeaks = 4,
                        ncores = NULL,
-                       iocores = 1){
+                       iocores = 1,
+                       vch=10){
 
   readf = match.arg(readf)
   smooth_method = match.arg(smooth_method)
@@ -186,7 +155,7 @@ getIsoPeaks = function(indir,
 
   iso_peaks = preprocessData(
     indir=indir, readf = readf, sep = sep, chunks = chunks, prepf = prepf,
-    ncores = ncores, iocores = iocores)
+    spectra = spectra, ncores = ncores, iocores = iocores, vch=vch)
 
   if (!is.null(outdir)){
     filenames = sub("mzML|tab|tsv", "txt", names(iso_peaks))

@@ -2,7 +2,7 @@
 % Please edit documentation in R/wls_q2e.R
 \name{prepare_data}
 \alias{prepare_data}
-\title{Title}
+\title{Helper function to prepare data for q2e estimation}
 \usage{
 prepare_data(
   peptides,
@@ -15,9 +15,6 @@ prepare_data(
 \arguments{
 \item{n_isopeaks}{}
 }
-\value{
-
-}
 \description{
-Title
+Helper function to prepare data for q2e estimation
 }

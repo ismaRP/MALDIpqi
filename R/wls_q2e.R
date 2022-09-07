@@ -1,6 +1,6 @@
 
 
-#' Title
+#' Helper function to prepare data for q2e estimation
 #'
 #' @param peptides
 #' @param outdir
@@ -28,7 +28,7 @@ prepare_data = function(peptides, outdir=NULL, data_list=NULL, indir=NULL,
       stop(paste0(indir, " file does not exist."))
     }
   } else {
-    stop("Either peaks and indir needs to be provided")
+    stop("Either peaks or indir need to be provided")
   }
 
   # Remove extension and replicate number
@@ -134,23 +134,35 @@ prepare_data = function(peptides, outdir=NULL, data_list=NULL, indir=NULL,
 }
 
 
-#' Title
+#' Estimation of peptide q2e
 #'
-#' @param peptides
-#' @param data_list
-#' @param indir
-#' @param n_isopeaks
-#' @param outdir
+#' Given a list of tables, each contaning the peptide isotopic peaks per samples,
+#' this function uses weighted least squares to estimate q2e
+#' @param peptides A dataframe with peptide information. It must contain at least 3 columns,
+#' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
+#' @param data_list list of isopeaks obtained from getIsoPeaks
+#' @param indir Path to lsit of isopeaks file is it was saved in a file
+#' @param n_isopeaks Number of isotopic peaks in isopeaks list
+#' @param outdir Optional file were weighte least square estimates of q2e are saved
 #'
-#' @return
+#' @return A data.frame with gamma and q2e estimates and
+#' minimum least square value of the estimate per sample, replicate and peptide
 #' @importFrom readr write_csv
 #' @importFrom dplyr bind_rows
 #' @importFrom stringr str_count
 #' @export
 #'
 #' @examples
-wls_q2e = function(peptides, data_list=NULL, indir=NULL,
+wls_q2e = function(peptides=NULL, data_list=NULL, indir=NULL,
                    n_isopeaks=5, outdir=NULL){
+
+  if (is.null(peptides)) {
+    peptides = load("data/peptides.rda")
+  }
+
+  if (is.null(data_list) & is.null(indir)) {
+    stop("Either peaks or indir need to be provided")
+  }
 
   prep_data = prepare_data(
     data_list = data_list, outdir=outdir, indir=indir,

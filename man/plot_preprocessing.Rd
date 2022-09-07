@@ -15,14 +15,12 @@ plot_preprocessing(
   s_name,
   n_isopeaks,
   min_isopeaks,
-  tol
+  tol,
+  normalize
 )
 }
 \arguments{
-\item{tol}{}
-}
-\value{
-
+\item{normalize}{}
 }
 \description{
 Title

@@ -9,9 +9,6 @@ LSest(X, data, weight)
 \arguments{
 \item{weight}{}
 }
-\value{
-
-}
 \description{
 LS estimate of gamma
 }

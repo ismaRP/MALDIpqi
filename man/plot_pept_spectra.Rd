@@ -9,6 +9,7 @@ plot_pept_spectra(
   spectra_names,
   readf,
   peptides = NULL,
+  normalize = F,
   smooth_method = c("SavitzkyGolay", "Wavelet"),
   thresh.scale = 2.5,
   hws_smooth = 8,
@@ -30,6 +31,9 @@ Currently restricted to one of "fread", "table" or "mzml"}
 
 \item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
 peptide number or ID, name, and m/z. IF NULL}
+
+\item{normalize}{Logical. Whether intensity hsould be normalized divinding by
+the total intensity for each peptide peaks range. DEfault is False}
 
 \item{smooth_method}{Smootherning method, one of "SavitzkyGolay" or "Wavelet".
 SavitzkyGolay uses \code{\link[MALDIquant]{smoothIntensity}} together with

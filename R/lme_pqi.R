@@ -1,15 +1,17 @@
 
 
 
-#' Title
+#' Calculate PQI using linear mixed effect model from q2e estimates
 #'
-#' @param q2e
-#' @param peptides
-#' @param outdir
-#' @param n_isopeaks
-#' @param g
+#' @param q2e data.frame with q2e estimations per sample, replicate and peptide
+#' @param peptidesA dataframe with peptide information. It must contain at least 3 columns,
+#' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
+#' @param outdir Optional. directory where results tables and plots are saved
+#' @param n_isopeaks Number of isotopic peaks per peptide extracted in previous steps
+#' @param g Reliability power in the error normal distribution from linear mixed effects model
 #'
-#' @return
+#' @return list contaning the following: data.frame of model estimates per replicate and peptide,
+#' data.frame with aggregated estimates per sample and model estimates, including g
 #' @importFrom nlme lme varComb varPower varIdent lmeControl
 #' @importFrom nlme ranef
 #' @importFrom dplyr pull mutate rename filter group_by summarise
@@ -19,8 +21,11 @@
 #' @export
 #'
 #' @examples
-lme_pqi = function(q2e, peptides, outdir=NULL, n_isopeaks=5, g="free"){
+lme_pqi = function(q2e, peptides=NULL, outdir=NULL, n_isopeaks=5, g="free"){
 
+  if (is.null(peptides)) {
+    peptides = load("data/peptides.rda")
+  }
   pept_names = pull(peptides, 1)
   pept_labels = pull(peptides, 6)
   names(pept_labels) = paste0('Pep', peptides)
@@ -132,10 +137,11 @@ lme_pqi = function(q2e, peptides, outdir=NULL, n_isopeaks=5, g="free"){
 }
 
 
-#' Title
+#' Plot distribution of q2e values per peptide
 #'
-#' @param q2e
-#' @param peptides
+#' @param q2e data.frame with q2e estimations per sample, replicate and peptide
+#' @param peptides A dataframe with peptide information. It must contain at least 3 columns,
+#' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
 #'
 #' @return
 #' @importFrom dplyr pull
@@ -167,10 +173,11 @@ plot_q = function(q2e, peptides){
 
 
 
-#' Title
+#' Quantile-Quantile plots of the linear mixed effect estimates per peptide
 #'
-#' @param pqi_m
-#' @param tit
+#' @param pqi_m data.frame of model estimates per replicate and peptide
+#' @param title Plot title
+#'
 #'
 #' @return
 #' @importFrom ggplot2 geom_qq geom_qq_line facet_wrap
@@ -178,7 +185,7 @@ plot_q = function(q2e, peptides){
 #' @export
 #'
 #' @examples
-pept_qqplot = function(pqi_m, tit=""){
+pept_qqplot = function(pqi_m, title=""){
   qq_plot = ggplot(pqi_m) +
     geom_qq(aes(sample=Res, color=Peptides)) +
     geom_qq_line(aes(sample=Res, color=Peptides)) +
@@ -190,14 +197,14 @@ pept_qqplot = function(pqi_m, tit=""){
     guides(colour = guide_legend(override.aes = list(size=4))) +
     ylab("quantiles of standardized residuals") +
     xlab("quantiles of standard normal") +
-    ggtitle(tit)
+    ggtitle(title)
   return(qq_plot)
 }
 
-#' Title
+#' Fitted versus residuals plot per peptide
 #'
-#' @param pqi_m
-#' @param tit
+#' @param pqi_m  data.frame of model estimates per replicate and peptide
+#' @param title
 #'
 #' @return
 #' @importFrom ggplot2 geom_point facet_wrap
@@ -205,7 +212,7 @@ pept_qqplot = function(pqi_m, tit=""){
 #' @export
 #'
 #' @examples
-fvsr = function(pqi_m, tit=""){
+fvsr = function(pqi_m, title=""){
   fvsr_plot = ggplot(pqi_m) +
     geom_point(aes(x=exp(Fitted), y=Res, color=Peptides),
                size=2.5, alpha=0.8) +
@@ -217,7 +224,7 @@ fvsr = function(pqi_m, tit=""){
           legend.text = element_text(size = 15),
           strip.text = element_text(size = 15)) +
     guides(colour = guide_legend(override.aes = list(size=4))) +
-    ggtitle(tit)
+    ggtitle(title)
   return(fvsr_plot)
 }
 

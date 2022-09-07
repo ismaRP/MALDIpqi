@@ -9,9 +9,6 @@ read_peaks(f, i, data_path)
 \arguments{
 \item{data_path}{}
 }
-\value{
-
-}
 \description{
 Title
 }

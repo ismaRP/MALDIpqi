@@ -2,16 +2,15 @@
 % Please edit documentation in R/lme_pqi.R
 \name{fvsr}
 \alias{fvsr}
-\title{Title}
+\title{Fitted versus residuals plot per peptide}
 \usage{
-fvsr(pqi_m, tit = "")
+fvsr(pqi_m, title = "")
 }
 \arguments{
-\item{tit}{}
-}
-\value{
+\item{pqi_m}{data.frame of model estimates per replicate and peptide}
 
+\item{title}{}
 }
 \description{
-Title
+Fitted versus residuals plot per peptide
 }
