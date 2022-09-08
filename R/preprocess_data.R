@@ -40,8 +40,9 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 #' A dataframe with peptide information. It must contain at least 3 columns,
 #' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
 #' @param readf
-#' A string value. choose function to use to read spectra.
-#' Currently restricted to one of "fread", "table" or "mzml"
+#' A string value. Choose function used to read spectra.
+#' Currently restricted to one of "fread", "table" or "mzml".
+#' See \code{\link[MALDIutils]{preprocessData}} for more info.
 #' @param outdir
 #' Folder where one peaks file for each sample should be written.
 #' If NULL (default), no files are written.
@@ -92,7 +93,11 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 #' @importFrom readr write_tsv
 #' @importFrom dplyr pull
 #' @export
-#' @details The default peptides are the ones from Nair et al. (2022) <https://www.biorxiv.org/content/10.1101/2022.03.13.483627v5.full.pdf>
+#' @details The default peptides are the ones from Nair et al. (2022).
+#' The paper contains the details on the preprocessing procedure.
+#' @references
+#'
+#' Nair, B. et al. (2022) ‘Parchment Glutamine Index (PQI): A novel method to estimate glutamine deamidation levels in parchment collagen obtained from low-quality MALDI-TOF data’, bioRxiv. doi:10.1101/2022.03.13.483627.
 #'
 #' @examples
 getIsoPeaks = function(indir,

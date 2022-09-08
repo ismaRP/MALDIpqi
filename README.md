@@ -23,6 +23,7 @@ Brown et al. (2021)
 You can install the released version of MALDIpqi from github with:
 
 ``` r
+install.packages('devtools')
 install.github("ismaRP/MALDIpqi")
 ```
 
@@ -47,18 +48,23 @@ science, 133, p. 105454.
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+``` r
+data_folder = "data/mzML"
+results_folder = "results_test"
+```
+
+This is minimal example of the workflow. It assumes the spectra are in
+data/mzML, in mzML format and with file names in the form
+“samplename_replicate.ext”. Where the replicate number is 1, 2 or 3 and
+ext is the extension of the files.
 
 ``` r
 library(MALDIpqi)
 
-data_folder = "data/mzML"
-results_folder = "results_test"
-
 iso_peaks = getIsoPeaks(
   indir=data_folder, outdir=NULL, readf="mzml",
   peptides = NULL, chunks = 50, n_isopeaks = 5, min_isopeaks = 4,
-  smooth_method = "SavitzkyGolay", hws_smooth = 8, hws_peak = 20, snr = 1.5)
+  smooth_method = "SavitzkyGolay", hws_smooth = 8, halfWindowSize = 20, SNR = 1.5)
 
 
 q2e = wls_q2e(peptides = NULL, n_isopeaks = 5,

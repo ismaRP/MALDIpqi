@@ -29,8 +29,9 @@ getIsoPeaks(
 \arguments{
 \item{indir}{Folder containing spectra.}
 
-\item{readf}{A string value. choose function to use to read spectra.
-Currently restricted to one of "fread", "table" or "mzml"}
+\item{readf}{A string value. Choose function used to read spectra.
+Currently restricted to one of "fread", "table" or "mzml".
+See \code{\link[MALDIutils]{preprocessData}} for more info.}
 
 \item{sep}{Separator character for txt spectra files}
 
@@ -85,5 +86,9 @@ Performs smoothening, baseline removal and peak detection on MALDI samples.
 From the peaks, isotopic peaks for a list of peptides are extracted.
 }
 \details{
-The default peptides are the ones from Nair et al. (2022) \url{https://www.biorxiv.org/content/10.1101/2022.03.13.483627v5.full.pdf}
+The default peptides are the ones from Nair et al. (2022).
+The paper contains the details on the preprocessing procedure.
+}
+\references{
+Nair, B. et al. (2022) ‘Parchment Glutamine Index (PQI): A novel method to estimate glutamine deamidation levels in parchment collagen obtained from low-quality MALDI-TOF data’, bioRxiv. doi:10.1101/2022.03.13.483627.
 }
