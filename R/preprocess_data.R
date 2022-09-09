@@ -46,7 +46,7 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 #' @param outdir
 #' Folder where one peaks file for each sample should be written.
 #' If NULL (default), no files are written.
-#' @param chunks
+#' @param nchunks
 #' Number of chunks all the spectra should be divided into for reading and
 #' processing. If all spectra is loaded and processed at once, i.e. chunks=1,
 #' it can overload RAM memory. If chunks>1 data is loaded and processed to the
@@ -106,7 +106,7 @@ getIsoPeaks = function(indir,
                        peptides=NULL,
                        spectra=NULL,
                        outdir = NULL,
-                       chunks = 50,
+                       nchunks = 50,
                        smooth_method = c("SavitzkyGolay","Wavelet"),
                        thresh.scale = 2.5,
                        hws_smooth = 20,
@@ -159,7 +159,7 @@ getIsoPeaks = function(indir,
     n_isopeaks = n_isopeaks, min_isopeaks = min_isopeaks)
 
   iso_peaks = preprocessData(
-    indir=indir, readf = readf, sep = sep, chunks = chunks, prepf = prepf,
+    indir=indir, readf = readf, sep = sep, nchunks = nchunks, prepf = prepf,
     spectra = spectra, ncores = ncores, iocores = iocores, vch=vch)
 
   if (!is.null(outdir)){

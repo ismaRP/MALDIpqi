@@ -11,7 +11,7 @@ getIsoPeaks(
   peptides = NULL,
   spectra = NULL,
   outdir = NULL,
-  chunks = 50,
+  nchunks = 50,
   smooth_method = c("SavitzkyGolay", "Wavelet"),
   thresh.scale = 2.5,
   hws_smooth = 20,
@@ -41,7 +41,7 @@ peptide number or ID, name, and m/z. IF NULL, default are used, see details.}
 \item{outdir}{Folder where one peaks file for each sample should be written.
 If NULL (default), no files are written.}
 
-\item{chunks}{Number of chunks all the spectra should be divided into for reading and
+\item{nchunks}{Number of chunks all the spectra should be divided into for reading and
 processing. If all spectra is loaded and processed at once, i.e. chunks=1,
 it can overload RAM memory. If chunks>1 data is loaded and processed to the
 much lighter list of peaks in chunks batches.}
