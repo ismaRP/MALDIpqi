@@ -4,15 +4,15 @@
 #' Calculate PQI using linear mixed effect model from q2e estimates
 #'
 #' @param q2e data.frame with q2e estimations per sample, replicate and peptide
-#' @param peptidesA dataframe with peptide information. It must contain at least 3 columns,
+#' @param g Reliability power in the error normal distribution from linear mixed effects model
+#' @param peptides A dataframe with peptide information. It must contain at least 3 columns,
 #' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
 #' @param outdir Optional. directory where results tables and plots are saved
 #' @param n_isopeaks Number of isotopic peaks per peptide extracted in previous steps
-#' @param g Reliability power in the error normal distribution from linear mixed effects model
 #'
 #' @return list contaning the following: data.frame of model estimates per replicate and peptide,
 #' data.frame with aggregated estimates per sample and model estimates, including g
-#' @importFrom nlme lme varComb varPower varIdent lmeControl
+#' @importFrom nlme lme varComb varPower varIdent varFixed lmeControl
 #' @importFrom nlme ranef
 #' @importFrom dplyr pull mutate rename filter group_by summarise
 #' @importFrom tibble as_tibble
@@ -21,7 +21,7 @@
 #' @export
 #'
 #' @examples
-lme_pqi = function(q2e, peptides=NULL, outdir=NULL, n_isopeaks=5, g="free"){
+lme_pqi = function(q2e, logq=TRUE, g=NULL, n_isopeaks=5, peptides=NULL, outdir=NULL){
 
   if (is.null(peptides)) {
     peptides = load("data/peptides.rda")
@@ -49,32 +49,38 @@ lme_pqi = function(q2e, peptides=NULL, outdir=NULL, n_isopeaks=5, g="free"){
   q2e = q2e[complete.cases(q2e[,ii]),ii]
   q2e$Sample = droplevels(q2e$Sample)
 
+  if (logq){
+    q2e = q2e %>% mutate(resp = Logq)
+  } else {
+    q2e = q2e %>% mutate(resp = q)
+  }
+
   ## mixed effect model
   if (g == "free"){
     m = lme(
-      Logq~0+Peptides,
+      resp~0+Peptides,
       random=~1|Sample/Replicates,
       weights=varComb(varPower(-1/2, form=~Reliability),
                       varIdent(form=~1|Peptides)),
       control=lmeControl(maxIter = 1000, msMaxIter = 1000, msMaxEval = 1000),
       data=q2e)
   } else {
-    # m = lme(
-    #   Logq~0+Peptides,
-    #   random=~1|Sample/Replicates,
-    #   weight=varComb(
-    #     varFixed(~I(1/Reliability)),
-    #     varIdent(form=~1|Peptides)
-    #   ),
-    #   control=lmeControl(maxIter = 1000, msMaxIter = 1000, msMaxEval = 1000),
-    #   data=q2e)
     m = lme(
       Logq~0+Peptides,
       random=~1|Sample/Replicates,
-      weights=varComb(varPower(fixed=g, form=~Reliability),
-                     varIdent(form=~1|Peptides)),
+      weight=varComb(
+        varFixed(~I(1/Reliability)),
+        varIdent(form=~1|Peptides)
+      ),
       control=lmeControl(maxIter = 1000, msMaxIter = 1000, msMaxEval = 1000),
       data=q2e)
+    # m = lme(
+    #   resp~0+Peptides,
+    #   random=~1|Sample/Replicates,
+    #   weights=varComb(varPower(fixed=g, form=~Reliability),
+    #                   varIdent(form=~1|Peptides)),
+    #   control=lmeControl(maxIter = 1000, msMaxIter = 1000, msMaxEval = 1000),
+    #   data=q2e)
   }
 
 
@@ -106,17 +112,25 @@ lme_pqi = function(q2e, peptides=NULL, outdir=NULL, n_isopeaks=5, g="free"){
 
   q2e_m_pred = q2e_m %>% group_by(Sample) %>%
     summarise(predict_sample(
-      Sample, Replicates, Peptides, Reliability, Logq,
+      Sample, Replicates, Peptides, Reliability, resp,
       estimates_m))
 
   ## here I have added untransformed and transformed prediction from both the model and function
   ## Prediction & PQI.PredictSample => from the function
   ## RanefModel & PQI.Model => from the model
-  q2e_m_pred = q2e_m_pred %>%
-    mutate(RanefModel=ranef(m)[["Sample"]][,1],
-           PQI.Model=exp(RanefModel),
-           PQI.PredictSample=exp(Prediction),
-           Sample = as.character(Sample))
+  if (logq){
+    q2e_m_pred = q2e_m_pred %>%
+      mutate(RanefModel=ranef(m)[['Sample']][,1],
+             PQI.Model=exp(RanefModel),
+             PQI.PredictSample=exp(Prediction),
+             Sample = as.character(Sample))
+  } else {
+    q2e_m_pred = q2e_m_pred %>%
+      mutate(RanefModel=ranef(m)[['Sample']][,1],
+             Sample = as.character(Sample),
+             PQI.Model=RanefModel,
+             PQI.PredictSample=Prediction)
+  }
 
   if (!is.null(outdir)){
     write_csv(
@@ -133,7 +147,8 @@ lme_pqi = function(q2e, peptides=NULL, outdir=NULL, n_isopeaks=5, g="free"){
     )
   }
 
-  return(list("pep" = q2e_m, "sample" = q2e_m_pred, "estimates" = estimates_m))
+  return(list("pep" = q2e_m, "sample" = q2e_m_pred, "estimates" = estimates_m,
+              "random_effects"=ranef(m), "fixed_effects"=fixef(m)))
 }
 
 

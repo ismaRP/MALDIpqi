@@ -106,8 +106,8 @@ LSest = function(X, data, weight) {
 #' @param Replicates
 #' @param Peptides
 #' @param Reliability
-#' @param Logq
-#'     log(q)
+#' @param resp Response variable, either q or Logq
+#'
 #' @param pars Contains the following parameters:
 #' \describe{
 #'     \item{data_I_s}{part of the data frame corresponding to Sample s.}
@@ -121,11 +121,11 @@ LSest = function(X, data, weight) {
 #' @export
 #' @importFrom tibble tibble
 #' @examples
-predict_sample <- function(Sample, Replicates, Peptides, Reliability, Logq, pars) {
+predict_sample <- function(Sample, Replicates, Peptides, Reliability, resp, pars) {
 
   data_I_s = data.frame(
     Sample=Sample, Replicates=Replicates, Peptides=Peptides,
-    Reliability=Reliability, Logq=Logq)
+    Reliability=Reliability, resp=resp)
 
   alpha = pars$alpha
   sigma2_S = pars$sigma2_S
@@ -142,10 +142,10 @@ predict_sample <- function(Sample, Replicates, Peptides, Reliability, Logq, pars
     if (length(unique(data_I_s$Sample))!=1) stop("Observations must come from the same sample.")
     # build Xi
     Xi = sigma2_S*matrix(1,nrow(data_I_s),nrow(data_I_s)) +
-      sigma2_R*outer(data_I_s$Replicates,data_I_s$Replicates,function(x,y){as.numeric(x==y)}) +
+      sigma2_R*outer(data_I_s$Replicates, data_I_s$Replicates, function(x,y){as.numeric(x==y)}) +
       diag((data_I_s$Reliability^(2*gamma))*sigma2[as.character(data_I_s$Peptides)],nrow=nrow(data_I_s))
     # prediction
-    E_X = sigma2_S*sum(solve(Xi,data_I_s$Logq-alpha[as.character(data_I_s$Peptides)]))
+    E_X = sigma2_S*sum(solve(Xi,data_I_s$resp-alpha[as.character(data_I_s$Peptides)]))
     # variance
     var_X = sigma2_S - (sigma2_S^2)*sum(solve(Xi,rep(1,nrow(data_I_s))))
   }

@@ -4,19 +4,26 @@
 \alias{lme_pqi}
 \title{Calculate PQI using linear mixed effect model from q2e estimates}
 \usage{
-lme_pqi(q2e, peptides = NULL, outdir = NULL, n_isopeaks = 5, g = "free")
+lme_pqi(
+  q2e,
+  logq = TRUE,
+  g = NULL,
+  n_isopeaks = 5,
+  peptides = NULL,
+  outdir = NULL
+)
 }
 \arguments{
 \item{q2e}{data.frame with q2e estimations per sample, replicate and peptide}
 
-\item{outdir}{Optional. directory where results tables and plots are saved}
+\item{g}{Reliability power in the error normal distribution from linear mixed effects model}
 
 \item{n_isopeaks}{Number of isotopic peaks per peptide extracted in previous steps}
 
-\item{g}{Reliability power in the error normal distribution from linear mixed effects model}
-
-\item{peptidesA}{dataframe with peptide information. It must contain at least 3 columns,
+\item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
 peptide number or ID, name, and m/z. IF NULL, default are used, see details.}
+
+\item{outdir}{Optional. directory where results tables and plots are saved}
 }
 \value{
 list contaning the following: data.frame of model estimates per replicate and peptide,

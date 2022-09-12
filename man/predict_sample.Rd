@@ -4,10 +4,10 @@
 \alias{predict_sample}
 \title{Title}
 \usage{
-predict_sample(Sample, Replicates, Peptides, Reliability, Logq, pars)
+predict_sample(Sample, Replicates, Peptides, Reliability, resp, pars)
 }
 \arguments{
-\item{Logq}{log(q)}
+\item{resp}{Response variable, either q or Logq}
 
 \item{pars}{Contains the following parameters:
 \describe{
