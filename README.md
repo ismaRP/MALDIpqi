@@ -66,12 +66,11 @@ iso_peaks = getIsoPeaks(
   peptides = peptides, chunks = 50, n_isopeaks = 5, min_isopeaks = 4,
   smooth_method = "SavitzkyGolay", hws_smooth = 8, halfWindowSize = 20, SNR = 1.5)
 
-
 q2e = wls_q2e(peptides = peptides, n_isopeaks = 5,
               data_list = iso_peaks, outdir=results_folder)
 
 res_free_gamma = lme_pqi(q2e, peptides=peptides, outdir=results_folder,
-                         n_isopeaks=5, g="free")
+                         logq = T, n_isopeaks=5, g="free")
 res_fixed_gamma = lme_pqi(q2e, peptides=peptides, outdir=results_folder,
-                          n_isopeaks=5, g=-1/2)
+                          logq = T, n_isopeaks=5, g=-1/2)
 ```

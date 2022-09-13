@@ -139,7 +139,8 @@ prepare_data = function(peptides, outdir=NULL, data_list=NULL, indir=NULL,
 #' Given a list of tables, each contaning the peptide isotopic peaks per samples,
 #' this function uses weighted least squares to estimate q2e
 #' @param peptides A dataframe with peptide information. It must contain at least 3 columns,
-#' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
+#' peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[MALDIutils]{getIsoPeaks}} details.
+#' The number or ID must have the form Pep# and be in the first column.
 #' @param data_list list of isopeaks obtained from getIsoPeaks
 #' @param indir Path to lsit of isopeaks file is it was saved in a file
 #' @param n_isopeaks Number of isotopic peaks in isopeaks list
@@ -153,12 +154,8 @@ prepare_data = function(peptides, outdir=NULL, data_list=NULL, indir=NULL,
 #' @export
 #'
 #' @examples
-wls_q2e = function(peptides=NULL, data_list=NULL, indir=NULL,
+wls_q2e = function(peptides=peptides, data_list=NULL, indir=NULL,
                    n_isopeaks=5, outdir=NULL){
-
-  if (is.null(peptides)) {
-    peptides = load("data/peptides.rda")
-  }
 
   if (is.null(data_list) & is.null(indir)) {
     stop("Either peaks or indir need to be provided")
@@ -232,13 +229,53 @@ wls_q2e = function(peptides=NULL, data_list=NULL, indir=NULL,
     df_out$sample = sample_names$sample
     df_out$peptide = m
     colnames(df_out) = c('gamma1', 'gamma2', 'gamma3', 'q', 'minLS',
-                         'sample', 'peptide')
+                         'sample', 'Peptides')
     q2e_estimates[[p]] = df_out
   }
   q2e_estimates = bind_rows(q2e_estimates)
+  q2e_estimates = q2e_estimates %>% mutate(Peptides = paste0('Pep', Peptides))
   if (!is.null(outdir)){
     write_csv(q2e_estimates, file.path(outdir, "wls_q2e.csv"))
   }
   return(q2e_estimates)
+}
+
+
+
+#' Plot distribution of q2e values per peptide
+#'
+#' @param q2e data.frame with q2e estimations per sample, replicate and peptide
+#' @param peptides A dataframe with peptide information. It must contain at least 3 columns,
+#' peptide number or ID, name, and m/z. If NULL, default are used, see\code{\link[MALDIutils]{getIsoPeaks}} details.
+#' The number or ID must have the form Pep# and be in the first column.
+#' @param label_idx Column index in peptides where the label is stored
+#' @param label_func labeller function to process labels. See \code{\link[ggplot2]{labeller}}
+#' Default is label_value.
+#' @return
+#' @importFrom dplyr pull
+#' @importFrom ggplot2 ggplot geom_histogram geom_density geom_vline facet_wrap
+#' @importFrom ggplot2 xlim xlab ggtitle theme
+#' @export
+#'
+#' @examples
+plot_q = function(q2e, peptides=peptides, label_idx=2, label_func = label_value){
+
+  pept_labels = pull(peptides, label_idx)
+  pept_number = pull(peptides, 1)
+  names(pept_labels) = pept_number
+
+  q_hist = ggplot(q2e, aes(x=q)) +
+    geom_histogram(aes(y=..density..,  fill=Peptides), colour="black")+
+    geom_density(aes(fill=Peptides), color='black', alpha=0.6) +
+    geom_vline(xintercept=c(0,1)) +
+    xlim(-1, 2) +
+    facet_wrap(
+      ~Peptides,
+      labeller = labeller(Peptides=as_labeller(pept_labels, label_func))) +
+    xlab("q") +
+    ggtitle("q WLS per peptide estimate") +
+    theme(plot.title = element_text(size=10))
+
+  return(q_hist)
 }
 

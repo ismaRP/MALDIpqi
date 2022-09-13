@@ -8,7 +8,9 @@ plot_pept_spectra(
   indir,
   spectra_names,
   readf,
-  peptides = NULL,
+  peptides = peptides,
+  label_idx = 2,
+  label_func = label_value,
   normalize = F,
   smooth_method = c("SavitzkyGolay", "Wavelet"),
   thresh.scale = 2.5,
@@ -30,7 +32,13 @@ plot_pept_spectra(
 Currently restricted to one of "fread", "table" or "mzml"}
 
 \item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
-peptide number or ID, name, and m/z. IF NULL}
+peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[MALDIutils]{getIsoPeaks}} details.
+The number or ID must have the form Pep# and be in the first column.}
+
+\item{label_idx}{Column index in peptides where the label is stored}
+
+\item{label_func}{labeller function to process labels. See \code{\link[ggplot2]{labeller}}
+Default is label_value.}
 
 \item{normalize}{Logical. Whether intensity hsould be normalized divinding by
 the total intensity for each peptide peaks range. DEfault is False}

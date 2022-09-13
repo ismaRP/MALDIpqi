@@ -4,30 +4,60 @@
 \alias{lme_pqi}
 \title{Calculate PQI using linear mixed effect model from q2e estimates}
 \usage{
-lme_pqi(
-  q2e,
-  logq = TRUE,
-  g = NULL,
-  n_isopeaks = 5,
-  peptides = NULL,
-  outdir = NULL
-)
+lme_pqi(q2e, logq = TRUE, g = NULL, peptides = peptides, outdir = NULL)
 }
 \arguments{
 \item{q2e}{data.frame with q2e estimations per sample, replicate and peptide}
 
+\item{logq}{Whether q values are log-scaled before entering the LME model}
+
 \item{g}{Reliability power in the error normal distribution from linear mixed effects model}
 
-\item{n_isopeaks}{Number of isotopic peaks per peptide extracted in previous steps}
-
 \item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
-peptide number or ID, name, and m/z. IF NULL, default are used, see details.}
+peptide number or ID, name, and m/z. If NULL, default peptides are used. See \code{\link[MALDIutils]{getIsoPeaks}} details.
+The number or ID must have the form Pep# and be in the first column.}
 
 \item{outdir}{Optional. directory where results tables and plots are saved}
 }
 \value{
-list contaning the following: data.frame of model estimates per replicate and peptide,
-data.frame with aggregated estimates per sample and model estimates, including g
+list contaning the following:
+\itemize{
+\item \strong{sample}: data.frame with aggregated PQI estimates per sample
+\item \strong{pep}: data.frame of fitted and residuals per replicate and peptide
+\item \strong{estimates}: list of model estimates
+}
+\code{sample} data.frame has the following columns:
+\itemize{
+\item Sample: sample name
+\item Prediction: sample random effects  obtained from custom formula that. It is the log(PQI)
+\item sd: log(PQI) standard error
+\item RanefModel: sample random effects, as calculated by \code{\link[nlme]{ranef}}.
+It should be the same as Prediction, up to numerical precision
+\item PQI.PredictSample and PQI.Model, exponentials of Prediction and RanefModel respectively.
+They contain the PQI
+}
+
+\code{pep} data.frame contains:
+\itemize{
+\item Sample, replicate and peptide IDs
+\item q: is the q calculated by the WLS from the isotopic distributions
+\item Reliability: minimum least square of q caluclated in the WLS step
+\item Loqq: log(q)
+\item resp: either q or log(q), according to whether logq was FALSE or TRUE
+\item Fitted: fitted q value
+\item Res: pearson residuals from Fitted
+\item Fitted0: fitted q values at the peptide level. It's equal to the peptide fixed effect
+\item Res0: pearson residuals from Fitted0
+}
+
+\code{estimates} list contains
+\itemize{
+\item alpha: peptide fixed effects
+\item sigma2_S: sample random effect variance
+\item sigma2_R: replicate random effect variance
+\item gamma: Reliability 2·gamma exponent
+\item sigma2: peptide fixed effects variance
+}
 }
 \description{
 Calculate PQI using linear mixed effect model from q2e estimates

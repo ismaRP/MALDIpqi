@@ -39,6 +39,7 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 #' @param peptides
 #' A dataframe with peptide information. It must contain at least 3 columns,
 #' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
+#' The number or ID must have the form Pep# and be in the first column.
 #' @param readf
 #' A string value. Choose function used to read spectra.
 #' Currently restricted to one of "fread", "table" or "mzml".
@@ -103,7 +104,7 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 getIsoPeaks = function(indir,
                        readf = c("fread", "table", "mzml"),
                        sep="\t",
-                       peptides=NULL,
+                       peptides=peptides,
                        spectra=NULL,
                        outdir = NULL,
                        nchunks = 50,
@@ -137,9 +138,7 @@ getIsoPeaks = function(indir,
           }
   )
 
-  if (is.null(peptides)) {
-    peptides = load("data/peptides.rda")
-  }
+
   pept_names = pull(peptides, 2)
   masses = pull(peptides, 3)
 

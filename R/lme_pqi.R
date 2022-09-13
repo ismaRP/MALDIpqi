@@ -4,14 +4,51 @@
 #' Calculate PQI using linear mixed effect model from q2e estimates
 #'
 #' @param q2e data.frame with q2e estimations per sample, replicate and peptide
+#' @param logq Whether q values are log-scaled before entering the LME model
 #' @param g Reliability power in the error normal distribution from linear mixed effects model
 #' @param peptides A dataframe with peptide information. It must contain at least 3 columns,
-#' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
+#' peptide number or ID, name, and m/z. If NULL, default peptides are used. See \code{\link[MALDIutils]{getIsoPeaks}} details.
+#' The number or ID must have the form Pep# and be in the first column.
 #' @param outdir Optional. directory where results tables and plots are saved
-#' @param n_isopeaks Number of isotopic peaks per peptide extracted in previous steps
+#' @return list contaning the following:
+#' \itemize{
+#'   \item \strong{sample}: data.frame with aggregated PQI estimates per sample
+#'   \item \strong{pep}: data.frame of fitted and residuals per replicate and peptide
+#'   \item \strong{estimates}: list of model estimates
+#' }
+#' \code{sample} data.frame has the following columns:
+#' \itemize{
+#'   \item Sample: sample name
+#'   \item Prediction: sample random effects  obtained from custom formula that. It is the log(PQI)
+#'   \item sd: log(PQI) standard error
+#'   \item RanefModel: sample random effects, as calculated by \code{\link[nlme]{ranef}}.
+#'         It should be the same as Prediction, up to numerical precision
+#'   \item PQI.PredictSample and PQI.Model, exponentials of Prediction and RanefModel respectively.
+#'         They contain the PQI
+#' }
 #'
-#' @return list contaning the following: data.frame of model estimates per replicate and peptide,
-#' data.frame with aggregated estimates per sample and model estimates, including g
+#' \code{pep} data.frame contains:
+#' \itemize{
+#'   \item Sample, replicate and peptide IDs
+#'   \item q: is the q calculated by the WLS from the isotopic distributions
+#'   \item Reliability: minimum least square of q caluclated in the WLS step
+#'   \item Loqq: log(q)
+#'   \item resp: either q or log(q), according to whether logq was FALSE or TRUE
+#'   \item Fitted: fitted q value
+#'   \item Res: pearson residuals from Fitted
+#'   \item Fitted0: fitted q values at the peptide level. It's equal to the peptide fixed effect
+#'   \item Res0: pearson residuals from Fitted0
+#' }
+#'
+#' \code{estimates} list contains
+#' \itemize{
+#'   \item alpha: peptide fixed effects
+#'   \item sigma2_S: sample random effect variance
+#'   \item sigma2_R: replicate random effect variance
+#'   \item gamma: Reliability 2·gamma exponent
+#'   \item sigma2: peptide fixed effects variance
+#' }
+#'
 #' @importFrom nlme lme varComb varPower varIdent varFixed lmeControl
 #' @importFrom nlme ranef
 #' @importFrom dplyr pull mutate rename filter group_by summarise
@@ -21,30 +58,21 @@
 #' @export
 #'
 #' @examples
-lme_pqi = function(q2e, logq=TRUE, g=NULL, n_isopeaks=5, peptides=NULL, outdir=NULL){
-
-  if (is.null(peptides)) {
-    peptides = load("data/peptides.rda")
-  }
-  pept_names = pull(peptides, 1)
-  pept_labels = pull(peptides, 6)
-  names(pept_labels) = paste0('Pep', peptides)
+lme_pqi = function(q2e, logq=TRUE, g=NULL, peptides=peptides, outdir=NULL){
 
   n_peptides = nrow(peptides)
   n_samples = nrow(q2e)/n_peptides
-  Peptides = paste0('Pep', q2e$peptide)
+  Peptides = q2e$Peptides
   Replicates = rep(c("1","2","3"), times = n_samples/3 * n_peptides)
-  PeptideMass = rep(pull(peptides, 3), each=n_samples)
 
   q2e = q2e %>%
     rename(Reliability = minLS, Sample = sample) %>%
     mutate(Sample = as.factor(Sample), Replicates = as.factor(Replicates),
-           Peptides = as.factor(Peptides), PeptideMass = as.factor(PeptideMass),
+           Peptides = as.factor(Peptides),
            Logq=log(q))
-  q2e = q2e %>% dplyr::filter(Reliability>0) ## filter dataset to remove 0 reliabilities that resulted in Inf when taken the reciprocal
+  q2e = q2e %>% filter(Reliability>0) ## filter dataset to remove 0 reliabilities that resulted in Inf when taken the reciprocal
 
-
-  ii = c("Sample","Replicates","Peptides","PeptideMass","q","Reliability","Logq")
+  ii = c("Sample","Replicates","Peptides","q","Reliability","Logq")
 
   q2e = q2e[complete.cases(q2e[,ii]),ii]
   q2e$Sample = droplevels(q2e$Sample)
@@ -147,52 +175,20 @@ lme_pqi = function(q2e, logq=TRUE, g=NULL, n_isopeaks=5, peptides=NULL, outdir=N
     )
   }
 
-  return(list("pep" = q2e_m, "sample" = q2e_m_pred, "estimates" = estimates_m,
-              "random_effects"=ranef(m), "fixed_effects"=fixef(m)))
+  return(list("pep" = q2e_m, "sample" = q2e_m_pred, "estimates" = estimates_m))
 }
-
-
-#' Plot distribution of q2e values per peptide
-#'
-#' @param q2e data.frame with q2e estimations per sample, replicate and peptide
-#' @param peptides A dataframe with peptide information. It must contain at least 3 columns,
-#' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
-#'
-#' @return
-#' @importFrom dplyr pull
-#' @importFrom ggplot2 ggplot geom_histogram geom_density geom_vline facet_wrap
-#' @importFrom ggplot2 xlim xlab ggtitle theme
-#' @export
-#'
-#' @examples
-plot_q = function(q2e, peptides){
-
-  pept_names = pull(peptides, 1)
-  pept_labels = pull(peptides, 6)
-  names(pept_labels) = paste0('Pep', peptides)
-
-  q_hist = ggplot(q2e, aes(x=q)) +
-    geom_histogram(aes(y=..density..,  fill=Peptides), colour="black")+
-    geom_density(aes(fill=Peptides), color='black', alpha=0.6) +
-    geom_vline(xintercept=c(0,1)) +
-    xlim(-1, 2) +
-    facet_wrap(
-      ~Peptides,
-      labeller = labeller(Peptides=as_labeller(pept_labels, label_parsed))) +
-    xlab("q") +
-    ggtitle("q WLS per peptide estimate") +
-    theme(plot.title = element_text(size=10))
-
-  return(q_hist)
-}
-
 
 
 #' Quantile-Quantile plots of the linear mixed effect estimates per peptide
 #'
 #' @param pqi_m data.frame of model estimates per replicate and peptide
 #' @param title Plot title
-#'
+#' @param peptidesA dataframe with peptide information. It must contain at least 3 columns,
+#' peptide number or ID, name, and m/z. If NULL, default peptides are used.
+#' The number or ID must have the form Pep# and be in the first column.  See \code{\link[MALDIutils]{getIsoPeaks}} details.
+#' @param label_idx Index where to pull the labels from peptides
+#' @param label_func labeller function to process labels. See \code{\link[ggplot2]{labeller}}
+#' Default is label_value.
 #'
 #' @return
 #' @importFrom ggplot2 geom_qq geom_qq_line facet_wrap
@@ -200,15 +196,23 @@ plot_q = function(q2e, peptides){
 #' @export
 #'
 #' @examples
-pept_qqplot = function(pqi_m, title=""){
+pept_qqplot = function(pqi_m, title="", peptides=peptides, label_idx=2,
+                       label_func = label_value){
+
+  pept_labels = pull(peptides, label_idx)
+  pept_number = pull(peptides, 1)
+  names(pept_labels) = pept_number
+
   qq_plot = ggplot(pqi_m) +
     geom_qq(aes(sample=Res, color=Peptides)) +
     geom_qq_line(aes(sample=Res, color=Peptides)) +
     # facet_wrap(~Peptides, scales="free") +
-    facet_wrap(~Peptides) +
+    facet_wrap(
+      ~Peptides,
+      labeller = labeller(Peptides=as_labeller(pept_labels, label_func))) +
     theme(legend.key.size=unit(1, "cm"),
           legend.text = element_text(size = 15),
-          strip.text = element_text(size = 15)) +
+          strip.text = element_text(size = 10)) +
     guides(colour = guide_legend(override.aes = list(size=4))) +
     ylab("quantiles of standardized residuals") +
     xlab("quantiles of standard normal") +
@@ -218,8 +222,14 @@ pept_qqplot = function(pqi_m, title=""){
 
 #' Fitted versus residuals plot per peptide
 #'
-#' @param pqi_m  data.frame of model estimates per replicate and peptide
-#' @param title
+#' @param pqi_m data.frame of model estimates per replicate and peptide
+#' @param title Plot title
+#' @param peptides A dataframe with peptide information. It must contain at least 3 columns,
+#' peptide number or ID, name, and m/z. If NULL, default peptides are used.
+#' The number or ID must have the form Pep# and be in the first column. See \code{\link[MALDIutils]{getIsoPeaks}} details.
+#' @param label_idx Index where to pull the labels from peptides
+#' @param label_func labeller function to process labels. See \code{\link[ggplot2]{labeller}}
+#' Default is label_value.
 #'
 #' @return
 #' @importFrom ggplot2 geom_point facet_wrap
@@ -227,17 +237,25 @@ pept_qqplot = function(pqi_m, title=""){
 #' @export
 #'
 #' @examples
-fvsr = function(pqi_m, title=""){
+fvsr = function(pqi_m, title="", peptides=peptides, label_idx=2,
+                label_func = label_value){
+
+  pept_labels = pull(peptides, label_idx)
+  pept_number = pull(peptides, 1)
+  names(pept_labels) = pept_number
+
   fvsr_plot = ggplot(pqi_m) +
     geom_point(aes(x=exp(Fitted), y=Res, color=Peptides),
                size=2.5, alpha=0.8) +
     # facet_wrap(~Peptides, scales="free") +
-    facet_wrap(~Peptides) +
+    facet_wrap(
+      ~Peptides,
+      labeller = labeller(Peptides=as_labeller(pept_labels, label_func))) +
     ylab("standardized residuals") +
     xlab("predicted q peptide") +
     theme(legend.key.size=unit(1, "cm"),
           legend.text = element_text(size = 15),
-          strip.text = element_text(size = 15)) +
+          strip.text = element_text(size = 10)) +
     guides(colour = guide_legend(override.aes = list(size=4))) +
     ggtitle(title)
   return(fvsr_plot)

@@ -79,7 +79,11 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
 #' @param spectra_names Character vector. Spectra names to plot
 #' @param peptides
 #' A dataframe with peptide information. It must contain at least 3 columns,
-#' peptide number or ID, name, and m/z. IF NULL
+#' peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[MALDIutils]{getIsoPeaks}} details.
+#' The number or ID must have the form Pep# and be in the first column.
+#' @param label_idx Column index in peptides where the label is stored
+#' @param label_func labeller function to process labels. See \code{\link[ggplot2]{labeller}}
+#' Default is label_value.
 #' @param normalize Logical. Whether intensity hsould be normalized divinding by
 #' the total intensity for each peptide peaks range. DEfault is False
 #' @param readf
@@ -125,7 +129,8 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
 plot_pept_spectra = function(indir,
                              spectra_names,
                              readf,
-                             peptides=NULL,
+                             peptides=peptides,
+                             label_idx=2, label_func = label_value,
                              normalize=F,
                              smooth_method = c("SavitzkyGolay", "Wavelet"),
                              thresh.scale = 2.5,
@@ -199,11 +204,11 @@ plot_pept_spectra = function(indir,
     # )
     # names(pept_labels) = pept_names
   }
-  pept_names = pull(peptides, 2)
-  masses = pull(peptides, 3)
-  pept_labels = pull(peptides, 6)
-  names(pept_labels) = pept_names
 
+  masses = pull(peptides, 3)
+  pept_labels = pull(peptides, label_idx)
+  pept_number = pull(peptides, 1)
+  names(pept_labels) = pept_number
 
   masses = matrix(masses, nrow = n_isopeaks,
                   ncol = length(masses), byrow = T)
@@ -230,7 +235,7 @@ plot_pept_spectra = function(indir,
     spectra_df = mapply(
       plot_preprocessing,
       masses,
-      pept_names,
+      pept_number,
       MoreArgs = list(
         s = s, s_br = s_br, p = peaks,
         baseline = baseline,
@@ -245,7 +250,7 @@ plot_pept_spectra = function(indir,
     data[[i]] = spectra_df
   }
   data = bind_rows(data)
-  data$peptide = factor(data$peptide, levels = pept_names)
+  data$peptide = factor(data$peptide, levels = pept_number)
   peaks = data %>% dplyr::filter(peak == T)
 
 
@@ -253,7 +258,7 @@ plot_pept_spectra = function(indir,
     geom_line(aes(x=mz, y=baseline, color=spectra)) +
     geom_line(aes(x=mz, y=int, color=spectra)) +
     facet_wrap(~peptide, ncol=3, scales='free',
-               labeller = labeller(peptide=as_labeller(pept_labels, label_parsed))) +
+               labeller = labeller(peptide=as_labeller(pept_labels, label_func))) +
     xlab('m/z') + ylab('Intensity') +
     theme(strip.text.x = element_text(size=8))
   befp
@@ -262,7 +267,7 @@ plot_pept_spectra = function(indir,
     geom_line(aes(x=mz, y=brint, color=spectra)) +
     geom_point(aes(x=mz, y=brint, color=spectra), data=peaks, size=3) +
     facet_wrap(~peptide, ncol=3, scales='free',
-               labeller = labeller(peptide=as_labeller(pept_labels, label_parsed))) +
+               labeller = labeller(peptide=as_labeller(pept_labels, label_func))) +
     xlab('m/z') + ylab('Intensity') +
     theme(strip.text.x = element_text(size=8))
   aftp
