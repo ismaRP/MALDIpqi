@@ -7,7 +7,7 @@
 pept_qqplot(
   pqi_m,
   title = "",
-  peptides = peptides,
+  peptides_user = NULL,
   label_idx = 2,
   label_func = label_value
 )
@@ -17,14 +17,14 @@ pept_qqplot(
 
 \item{title}{Plot title}
 
+\item{peptides_user}{A dataframe with peptide information. It must contain at least 3 columns,
+peptide number or ID, name, and m/z. If NULL, default peptides are used.
+The number or ID must have the form Pep# and be in the first column.  See \code{\link[MALDIutils]{getIsoPeaks}} details.}
+
 \item{label_idx}{Index where to pull the labels from peptides}
 
 \item{label_func}{labeller function to process labels. See \code{\link[ggplot2]{labeller}}
 Default is label_value.}
-
-\item{peptidesA}{dataframe with peptide information. It must contain at least 3 columns,
-peptide number or ID, name, and m/z. If NULL, default peptides are used.
-The number or ID must have the form Pep# and be in the first column.  See \code{\link[MALDIutils]{getIsoPeaks}} details.}
 }
 \description{
 Quantile-Quantile plots of the linear mixed effect estimates per peptide

@@ -5,7 +5,7 @@
 \title{Helper function to prepare data for q2e estimation}
 \usage{
 prepare_data(
-  peptides,
+  peptides_user = NULL,
   outdir = NULL,
   data_list = NULL,
   indir = NULL,

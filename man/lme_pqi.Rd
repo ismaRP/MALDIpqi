@@ -4,7 +4,7 @@
 \alias{lme_pqi}
 \title{Calculate PQI using linear mixed effect model from q2e estimates}
 \usage{
-lme_pqi(q2e, logq = TRUE, g = NULL, peptides = peptides, outdir = NULL)
+lme_pqi(q2e, logq = TRUE, g = NULL, outdir = NULL, return_model = F)
 }
 \arguments{
 \item{q2e}{data.frame with q2e estimations per sample, replicate and peptide}
@@ -12,10 +12,6 @@ lme_pqi(q2e, logq = TRUE, g = NULL, peptides = peptides, outdir = NULL)
 \item{logq}{Whether q values are log-scaled before entering the LME model}
 
 \item{g}{Reliability power in the error normal distribution from linear mixed effects model}
-
-\item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
-peptide number or ID, name, and m/z. If NULL, default peptides are used. See \code{\link[MALDIutils]{getIsoPeaks}} details.
-The number or ID must have the form Pep# and be in the first column.}
 
 \item{outdir}{Optional. directory where results tables and plots are saved}
 }

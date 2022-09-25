@@ -152,7 +152,7 @@ predict_sample <- function(Sample, Replicates, Peptides, Reliability, resp, pars
 
   # return
   names(E_X) = names(var_X) <- NULL
-  return(tibble(Prediction=E_X, sd=sqrt(var_X)))
+  return(tibble(PQI.PredictSample=E_X, sd=sqrt(var_X)))
 }
 
 
@@ -166,7 +166,8 @@ predict_sample <- function(Sample, Replicates, Peptides, Reliability, resp, pars
 #' @importFrom stats coef
 #'
 #' @examples
-extract_estimates = function(m, q_data) {
+extract_estimates = function(m) {
+  q_data = m$data
   alpha.m = fixef(m)
   names(alpha.m) = substr(names(alpha.m), 9, 12) ## to align the code, remove Peptides from the names
   tmp = coef(m$modelStruct$reStruct, FALSE) * (m$sigma^2)

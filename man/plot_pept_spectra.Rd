@@ -8,7 +8,7 @@ plot_pept_spectra(
   indir,
   spectra_names,
   readf,
-  peptides = peptides,
+  peptides_user = NULL,
   label_idx = 2,
   label_func = label_value,
   normalize = F,
@@ -31,7 +31,7 @@ plot_pept_spectra(
 \item{readf}{A string value. choose function to use to read spectra.
 Currently restricted to one of "fread", "table" or "mzml"}
 
-\item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
+\item{peptides_user}{A dataframe with peptide information. It must contain at least 3 columns,
 peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[MALDIutils]{getIsoPeaks}} details.
 The number or ID must have the form Pep# and be in the first column.}
 

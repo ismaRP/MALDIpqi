@@ -6,10 +6,9 @@
 #' @param q2e data.frame with q2e estimations per sample, replicate and peptide
 #' @param logq Whether q values are log-scaled before entering the LME model
 #' @param g Reliability power in the error normal distribution from linear mixed effects model
-#' @param peptides A dataframe with peptide information. It must contain at least 3 columns,
-#' peptide number or ID, name, and m/z. If NULL, default peptides are used. See \code{\link[MALDIutils]{getIsoPeaks}} details.
-#' The number or ID must have the form Pep# and be in the first column.
+#' @param return_model
 #' @param outdir Optional. directory where results tables and plots are saved
+#'
 #' @return list contaning the following:
 #' \itemize{
 #'   \item \strong{sample}: data.frame with aggregated PQI estimates per sample
@@ -51,37 +50,31 @@
 #'
 #' @importFrom nlme lme varComb varPower varIdent varFixed lmeControl
 #' @importFrom nlme ranef
-#' @importFrom dplyr pull mutate rename filter group_by summarise
+#' @importFrom dplyr mutate filter group_by summarise
 #' @importFrom tibble as_tibble
 #' @importFrom readr write_csv
-#' @importFrom stats complete.cases residuals fitted
+#' @importFrom stats complete.cases fitted residuals
 #' @export
 #'
 #' @examples
-lme_pqi = function(q2e, logq=TRUE, g=NULL, peptides=peptides, outdir=NULL){
-
-  n_peptides = nrow(peptides)
-  n_samples = nrow(q2e)/n_peptides
-  Peptides = q2e$Peptides
-  Replicates = rep(c("1","2","3"), times = n_samples/3 * n_peptides)
+lme_pqi = function(q2e, logq=TRUE, g=NULL, outdir=NULL,
+                   return_model=F){
 
   q2e = q2e %>%
-    rename(Reliability = minLS, Sample = sample) %>%
     mutate(Sample = as.factor(Sample), Replicates = as.factor(Replicates),
-           Peptides = as.factor(Peptides),
-           Logq=log(q))
+           Peptides = as.factor(Peptides))
   q2e = q2e %>% filter(Reliability>0) ## filter dataset to remove 0 reliabilities that resulted in Inf when taken the reciprocal
 
-  ii = c("Sample","Replicates","Peptides","q","Reliability","Logq")
-
-  q2e = q2e[complete.cases(q2e[,ii]),ii]
-  q2e$Sample = droplevels(q2e$Sample)
-
   if (logq){
-    q2e = q2e %>% mutate(resp = Logq)
+    q2e = q2e %>% mutate(resp = log(q))
   } else {
     q2e = q2e %>% mutate(resp = q)
   }
+
+  ii = c("Sample","Replicates","Peptides","resp","Reliability")
+
+  q2e = q2e[complete.cases(q2e[,ii]),ii]
+  q2e$Sample = droplevels(q2e$Sample)
 
   ## mixed effect model
   if (g == "free"){
@@ -94,7 +87,7 @@ lme_pqi = function(q2e, logq=TRUE, g=NULL, peptides=peptides, outdir=NULL){
       data=q2e)
   } else {
     m = lme(
-      Logq~0+Peptides,
+      resp~0+Peptides,
       random=~1|Sample/Replicates,
       weight=varComb(
         varFixed(~I(1/Reliability)),
@@ -111,79 +104,141 @@ lme_pqi = function(q2e, logq=TRUE, g=NULL, peptides=peptides, outdir=NULL){
     #   data=q2e)
   }
 
-
-
-  ## mutate into the parent dataframe fitted values and residuals for plotting
-  q2e_m = q2e %>%
-    mutate(Fitted=fitted(m),
-           Res=residuals(m, type = "pearson"),
-           Fitted0=fitted(m, level = 0),
-           Res0=residuals(m, level = 0, type = "pearson")) %>%
-    as_tibble()
-
-
-
   ## extract parameter estimates from lme object
-  estimates_m = extract_estimates(m, q2e_m)
+  estimates_m = extract_estimates(m)
   if (g != "free"){
     estimates_m$gamma = g
   }
-  ## build a matrix containing the sample predictions and their standard errors
-  # hatX_m0 = matrix(0,length(levels(q_data$Sample)),2)
-  # rownames(hatX_m0) = levels(q_data$Sample)
-  # colnames(hatX_m0) = c("Prediction","sd")
-  # for (ii in levels(q_data$Sample)) {
-  #   hatX_m0[ii,] = predict_sample(dplyr::filter(q_data,Sample==ii), alpham0, sigma2_S.m0,
-  #                                              sigma2_R.m0, gamma.m0, sigma2.m0)
-  # }
-  # hatX_m0 = as_tibble(hatX_m0, rownames = 'Sample')
 
-  q2e_m_pred = q2e_m %>% group_by(Sample) %>%
-    summarise(predict_sample(
-      Sample, Replicates, Peptides, Reliability, resp,
-      estimates_m))
+  prediction = predict_pqi(m, estimates_m, logq=logq)
+
+  ## mutate into the parent dataframe fitted values and residuals for plotting
+  # q2e_m = q2e %>%
+  # mutate(Fitted=fitted(m),
+  #        Res=residuals(m, type = "pearson"),
+  #        Fitted0=fitted(m, level = 0),
+  #        Res0=residuals(m, level = 0, type = "pearson")) %>%
+  # as_tibble()
+
+  # q2e_m_pred = q2e_m %>% group_by(Sample) %>%
+  #   summarise(predict_sample(
+  #     Sample, Replicates, Peptides, Reliability, resp,
+  #     estimates_m))
 
   ## here I have added untransformed and transformed prediction from both the model and function
   ## Prediction & PQI.PredictSample => from the function
   ## RanefModel & PQI.Model => from the model
-  if (logq){
-    q2e_m_pred = q2e_m_pred %>%
-      mutate(RanefModel=ranef(m)[['Sample']][,1],
-             PQI.Model=exp(RanefModel),
-             PQI.PredictSample=exp(Prediction),
-             Sample = as.character(Sample))
-  } else {
-    q2e_m_pred = q2e_m_pred %>%
-      mutate(RanefModel=ranef(m)[['Sample']][,1],
-             Sample = as.character(Sample),
-             PQI.Model=RanefModel,
-             PQI.PredictSample=Prediction)
-  }
+  # if (logq){
+  #   q2e_m_pred = q2e_m_pred %>%
+  #     mutate(RanefModel=ranef(m)[['Sample']][,1],
+  #            PQI.Model=exp(RanefModel),
+  #            PQI.PredictSample=exp(Prediction),
+  #            Sample = as.character(Sample))
+  # } else {
+  #   q2e_m_pred = q2e_m_pred %>%
+  #     mutate(RanefModel=ranef(m)[['Sample']][,1],
+  #            Sample = as.character(Sample),
+  #            PQI.Model=RanefModel,
+  #            PQI.PredictSample=Prediction)
+  # }
 
   if (!is.null(outdir)){
     write_csv(
-      q2e_m,
+      prediction$pep,
       file.path(
         outdir,
         sprintf('PQI_pep_estimates_gamma%3.3f.csv', estimates_m$gamma))
     )
     write_csv(
-      q2e_m_pred,
+      prediction$sample,
       file.path(
         outdir,
         sprintf('PQI_sample_estimates_gamma%3.3f.csv', estimates_m$gamma))
     )
   }
 
-  return(list("pep" = q2e_m, "sample" = q2e_m_pred, "estimates" = estimates_m))
+  prediction[['estimates']] = estimates_m
+  if (return_model) prediction[['model']] = m
+
+  return(prediction)
 }
+
+
+#' Title
+#'
+#' @param model lme model object
+#' @param new_q2e New q2e data for which PQI is predicted using the trained model
+#' q is stored in a column called "resp"
+#' @param logq whether q is in log-scale in q2e or new_q2e
+#'
+#' @importFrom nlme lme ranef
+#' @importFrom dplyr mutate filter group_by summarise
+#' @importFrom tibble as_tibble
+#' @importFrom stats complete.cases fitted residuals
+#' @return
+#' @export
+#' @examples
+predict_pqi = function(model, estimates, new_q2e=NULL, logq=T){
+
+  if (is.null(new_q2e)) {
+    q2e = model$data
+    pqi = q2e %>% group_by(Sample) %>%
+      summarise(predict_sample(
+        Sample, Replicates, Peptides, Reliability, resp,
+        estimates)) %>%
+      mutate(PQI.Model=ranef(model)[['Sample']][,1])
+    if (logq) {
+      pqi = pqi %>% mutate(
+        PQI.PredictSample = exp(PQI.PredictSample),
+        PQI.Model = exp(PQI.Model)
+      )
+    }
+    q2e_m = q2e %>%
+      mutate(Fitted=fitted(model),
+             Res=residuals(model, type = "pearson"),
+             Fitted0=fitted(model, level = 0),
+             Res0=residuals(model, level = 0, type = "pearson")) %>%
+      as_tibble()
+
+  } else {
+    q2e = q2e %>%
+      mutate(Sample = as.factor(Sample), Replicates = as.factor(Replicates),
+             Peptides = as.factor(Peptides))
+    q2e = q2e %>% filter(Reliability>0) ## filter dataset to remove 0 reliabilities that resulted in Inf when taken the reciprocal
+
+    ii = c("Sample","Replicates","Peptides","Reliability","resp")
+
+    q2e = q2e[complete.cases(q2e[,ii]),ii]
+    q2e$Sample = droplevels(q2e$Sample)
+
+    pqi = q2e %>% group_by(Sample) %>%
+      summarise(predict_sample(
+        Sample, Replicates, Peptides, Reliability, resp,
+        estimates))
+    q2e_m = q2e %>%
+      mutate(
+        predicted_q = predict(model, new_q2e, asList=F)
+      )
+    if (logq){
+      pqi = pqi %>% mutate(PQI.PredictSample = exp(PQI.PredictSample))
+    }
+    q2e_m = q2e_m %>%
+      mutate(
+        Pred = exp(predicted_q),
+        Res = (resp-predicted_q)/sqrt(predicted_q))
+
+  }
+
+  return(list('pep'=q2e_m, 'sample'=pqi))
+}
+
 
 
 #' Quantile-Quantile plots of the linear mixed effect estimates per peptide
 #'
 #' @param pqi_m data.frame of model estimates per replicate and peptide
 #' @param title Plot title
-#' @param peptidesA dataframe with peptide information. It must contain at least 3 columns,
+#' @param peptides_user A dataframe with peptide information. It must contain at least 3 columns,
 #' peptide number or ID, name, and m/z. If NULL, default peptides are used.
 #' The number or ID must have the form Pep# and be in the first column.  See \code{\link[MALDIutils]{getIsoPeaks}} details.
 #' @param label_idx Index where to pull the labels from peptides
@@ -196,11 +251,12 @@ lme_pqi = function(q2e, logq=TRUE, g=NULL, peptides=peptides, outdir=NULL){
 #' @export
 #'
 #' @examples
-pept_qqplot = function(pqi_m, title="", peptides=peptides, label_idx=2,
+pept_qqplot = function(pqi_m, title="", peptides_user=NULL, label_idx=2,
                        label_func = label_value){
 
-  pept_labels = pull(peptides, label_idx)
-  pept_number = pull(peptides, 1)
+  if (is.null(peptides_user)) peptides_user = peptides
+  pept_labels = pull(peptides_user, label_idx)
+  pept_number = pull(peptides_user, 1)
   names(pept_labels) = pept_number
 
   qq_plot = ggplot(pqi_m) +
@@ -224,7 +280,7 @@ pept_qqplot = function(pqi_m, title="", peptides=peptides, label_idx=2,
 #'
 #' @param pqi_m data.frame of model estimates per replicate and peptide
 #' @param title Plot title
-#' @param peptides A dataframe with peptide information. It must contain at least 3 columns,
+#' @param peptides_user A dataframe with peptide information. It must contain at least 3 columns,
 #' peptide number or ID, name, and m/z. If NULL, default peptides are used.
 #' The number or ID must have the form Pep# and be in the first column. See \code{\link[MALDIutils]{getIsoPeaks}} details.
 #' @param label_idx Index where to pull the labels from peptides
@@ -237,11 +293,12 @@ pept_qqplot = function(pqi_m, title="", peptides=peptides, label_idx=2,
 #' @export
 #'
 #' @examples
-fvsr = function(pqi_m, title="", peptides=peptides, label_idx=2,
+fvsr = function(pqi_m, title="", peptides_user=NULL, label_idx=2,
                 label_func = label_value){
 
-  pept_labels = pull(peptides, label_idx)
-  pept_number = pull(peptides, 1)
+  if (is.null(peptides_user)) peptides_user = peptides
+  pept_labels = pull(peptides_user, label_idx)
+  pept_number = pull(peptides_user, 1)
   names(pept_labels) = pept_number
 
   fvsr_plot = ggplot(pqi_m) +

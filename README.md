@@ -4,6 +4,8 @@
 # MALDIpqi
 
 <!-- badges: start -->
+
+[![DOI](https://zenodo.org/badge/436219305.svg)](https://zenodo.org/badge/latestdoi/436219305)
 <!-- badges: end -->
 
 MALDIpqi calculates Parchment Glutamine Index from MALDI TOF ZooMS data.

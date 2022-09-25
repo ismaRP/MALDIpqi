@@ -8,7 +8,7 @@ getIsoPeaks(
   indir,
   readf = c("fread", "table", "mzml"),
   sep = "\\t",
-  peptides = peptides,
+  peptides_user = NULL,
   spectra = NULL,
   outdir = NULL,
   nchunks = 50,
@@ -35,7 +35,7 @@ See \code{\link[MALDIutils]{preprocessData}} for more info.}
 
 \item{sep}{Separator character for txt spectra files}
 
-\item{peptides}{A dataframe with peptide information. It must contain at least 3 columns,
+\item{peptides_user}{A dataframe with peptide information. It must contain at least 3 columns,
 peptide number or ID, name, and m/z. IF NULL, default are used, see details.
 The number or ID must have the form Pep# and be in the first column.}
 

@@ -36,7 +36,7 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 #' From the peaks, isotopic peaks for a list of peptides are extracted.
 #'
 #' @param indir Folder containing spectra.
-#' @param peptides
+#' @param peptides_user
 #' A dataframe with peptide information. It must contain at least 3 columns,
 #' peptide number or ID, name, and m/z. IF NULL, default are used, see details.
 #' The number or ID must have the form Pep# and be in the first column.
@@ -104,7 +104,7 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 getIsoPeaks = function(indir,
                        readf = c("fread", "table", "mzml"),
                        sep="\t",
-                       peptides=peptides,
+                       peptides_user=NULL,
                        spectra=NULL,
                        outdir = NULL,
                        nchunks = 50,
@@ -138,9 +138,9 @@ getIsoPeaks = function(indir,
           }
   )
 
+  if (is.null(peptides_user)) peptides_user = peptides
 
-  pept_names = pull(peptides, 2)
-  masses = pull(peptides, 3)
+  masses = pull(peptides_user, 3)
 
   npepts = length(masses)
   spectra_f = list.files(indir)
@@ -172,5 +172,21 @@ getIsoPeaks = function(indir,
     ))
   }
   return(iso_peaks)
+}
+
+
+#' Get isotopic peaks for reference dataset
+#'
+#' @return A list of dataframes, 1 per sample. Each dataframe has 3 columns,
+#' m/z, intensity and signal-to-noise ratio for each of the n_isopeaks from each
+#' peptide. Missing peaks are NAs.
+#' @export
+#' @details It retrieves the isotopic envelopes for the default peptides for the
+#' Orval Abbey dataset
+#' @references
+#' Bethencourt, J.H. et al. (2022) ‘Data from “A biocodicological analysis of the medieval library and archive from Orval abbey, Belgium”’, Journal of open archaeology data, 10(0). doi:10.5334/joad.89.
+#' @examples
+get_ref_isopeaks = function(){
+  return(iso_peaks_orval)
 }
 

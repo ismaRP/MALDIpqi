@@ -77,7 +77,7 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
 #'
 #' @param indir Folder containing spectra.
 #' @param spectra_names Character vector. Spectra names to plot
-#' @param peptides
+#' @param peptides_user
 #' A dataframe with peptide information. It must contain at least 3 columns,
 #' peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[MALDIutils]{getIsoPeaks}} details.
 #' The number or ID must have the form Pep# and be in the first column.
@@ -129,7 +129,7 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
 plot_pept_spectra = function(indir,
                              spectra_names,
                              readf,
-                             peptides=peptides,
+                             peptides_user=NULL,
                              label_idx=2, label_func = label_value,
                              normalize=F,
                              smooth_method = c("SavitzkyGolay", "Wavelet"),
@@ -182,32 +182,11 @@ plot_pept_spectra = function(indir,
   )
 
 
-  if (is.null(peptides)) {
-    peptides = load("data/peptides.rda")
-    # masses = c(
-    #   1105.58, 2019.95, 2040.97, 2689.25,
-    #   3033.50, 3093.48, 3084.42, 3116.40
-    # )
-    # pept_names = c(
-    #   'COL1a1 508-519', 'COL1a1 270-291', 'COL1a1 375-396', 'COL1a1 934-963',
-    #   'COL1a2 756-789', 'COL1a2 756-789 p', 'COL1a1 9-42', 'COL1a1 9-42 p'
-    # )
-    # pept_labels = c(
-    #   'atop(paste("a) COL1", alpha, "1 508-519 ", "1"%*%"(Pro->Hyp)"), paste("GV", bold("Q"), "GPPGPAGEEGKR"))',
-    #   'atop(paste("b) COL1", alpha, "1 270-291 ", "2"%*%"(Pro->Hyp)"), paste("GEPGPTGI", bold("Q"), "GPPGPAGEEGKR"))',
-    #   'atop(paste("c) COL1", alpha, "1 375-396 ", "3"%*%"(Pro->Hyp)"), paste("TGPPGPAG", bold("Q"), "DGRPGPPGPPGAR"))',
-    #   'atop(paste("d) COL1", alpha, "1 934-963 ", "2"%*%"(Pro->Hyp)"), paste("GFSGL", bold("Q"), "GPPGPPGSPGE", bold("Q"), "GPSGASGPAGPR"))',
-    #   'atop(paste("e) COL1", alpha, "2 756-789 ", "5"%*%"(Pro->Hyp)"), paste("GPSGEPGTAGPPGTPGP", bold("Q"), "GLLGAPGFLGLPGSR"))',
-    #   'atop(paste("f) COL1", alpha, "2 756-789 ", "5"%*%"(Pro->Hyp)"), paste("GPSGEPGTAGPPGTPGP", bold("Q"), "GFLGPPGFLGLPGSR"))',
-    #   'atop(paste("g) COL1", alpha, "1 9-42 ", "5"%*%"(Pro->Hyp)"), paste("GLPGPPGAPGP", bold("Q"), "GF", bold("Q"), "GPPGEPGEPGASGPMGPR"))',
-    #   'atop(paste("h) COL1", alpha, "1 9-42 ", "7"%*%"(Pro->Hyp)"), paste("GLPGPPGAPGP", bold("Q"), "GF", bold("Q"), "GPPGEPGEPGASGPMGPR"))'
-    # )
-    # names(pept_labels) = pept_names
-  }
+  if (is.null(peptides_user)) peptides_user = peptides
 
-  masses = pull(peptides, 3)
-  pept_labels = pull(peptides, label_idx)
-  pept_number = pull(peptides, 1)
+  masses = pull(peptides_user, 3)
+  pept_labels = pull(peptides_user, label_idx)
+  pept_number = pull(peptides_user, 1)
   names(pept_labels) = pept_number
 
   masses = matrix(masses, nrow = n_isopeaks,
