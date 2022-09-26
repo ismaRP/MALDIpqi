@@ -60,7 +60,7 @@ library(MALDIpqi)
 
 iso_peaks = getIsoPeaks(
   indir=data_folder, outdir=NULL, readf="mzml",
-  peptides = peptides, chunks = 50, n_isopeaks = 5, min_isopeaks = 4,
+  peptides = peptides, nchunks = 50, n_isopeaks = 5, min_isopeaks = 4,
   smooth_method = "SavitzkyGolay", hws_smooth = 8, halfWindowSize = 20, SNR = 1.5)
 
 q2e = wls_q2e(peptides = peptides, n_isopeaks = 5,
