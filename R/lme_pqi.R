@@ -201,21 +201,21 @@ predict_pqi = function(model, estimates, new_q2e=NULL, logq=T){
       as_tibble()
 
   } else {
-    q2e = q2e %>%
+    new_q2e = new_q2e %>%
       mutate(Sample = as.factor(Sample), Replicates = as.factor(Replicates),
              Peptides = as.factor(Peptides))
-    q2e = q2e %>% filter(Reliability>0) ## filter dataset to remove 0 reliabilities that resulted in Inf when taken the reciprocal
+    new_q2e = new_q2e %>% filter(Reliability>0) ## filter dataset to remove 0 reliabilities that resulted in Inf when taken the reciprocal
 
     ii = c("Sample","Replicates","Peptides","Reliability","resp")
 
-    q2e = q2e[complete.cases(q2e[,ii]),ii]
-    q2e$Sample = droplevels(q2e$Sample)
+    new_q2e = new_q2e[complete.cases(new_q2e[,ii]),ii]
+    new_q2e$Sample = droplevels(new_q2e$Sample)
 
-    pqi = q2e %>% group_by(Sample) %>%
+    pqi = new_q2e %>% group_by(Sample) %>%
       summarise(predict_sample(
         Sample, Replicates, Peptides, Reliability, resp,
         estimates))
-    q2e_m = q2e %>%
+    q2e_m = new_q2e %>%
       mutate(
         predicted_q = predict(model, new_q2e, asList=F)
       )

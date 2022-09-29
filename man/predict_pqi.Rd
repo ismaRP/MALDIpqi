@@ -4,17 +4,15 @@
 \alias{predict_pqi}
 \title{Title}
 \usage{
-predict_pqi(q2e, estimates, model, logq = T)
+predict_pqi(model, estimates, new_q2e = NULL, logq = T)
 }
 \arguments{
-\item{q2e}{q2e table for each sample, replicate and peptide. q is stored in
-a column called "resp"}
-
-\item{estimates}{model estimates}
-
 \item{model}{lme model object}
 
-\item{logq}{whether q is in log-scale in q2e}
+\item{new_q2e}{New q2e data for which PQI is predicted using the trained model
+q is stored in a column called "resp"}
+
+\item{logq}{whether q is in log-scale in q2e or new_q2e}
 }
 \description{
 Title

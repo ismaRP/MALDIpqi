@@ -4,7 +4,7 @@
 \alias{extract_estimates}
 \title{Title}
 \usage{
-extract_estimates(m, q_data)
+extract_estimates(m)
 }
 \arguments{
 \item{q_data}{}

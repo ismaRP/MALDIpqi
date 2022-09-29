@@ -6,6 +6,18 @@
 \usage{
 get_ref_isopeaks()
 }
+\value{
+A list of dataframes, 1 per sample. Each dataframe has 3 columns,
+m/z, intensity and signal-to-noise ratio for each of the n_isopeaks from each
+peptide. Missing peaks are NAs.
+}
 \description{
 Get isotopic peaks for reference dataset
+}
+\details{
+It retrieves the isotopic envelopes for the default peptides for the
+Orval Abbey dataset
+}
+\references{
+Bethencourt, J.H. et al. (2022) ‘Data from “A biocodicological analysis of the medieval library and archive from Orval abbey, Belgium”’, Journal of open archaeology data, 10(0). doi:10.5334/joad.89.
 }
