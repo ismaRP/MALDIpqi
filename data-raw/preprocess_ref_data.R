@@ -16,9 +16,11 @@ iso_peaks_orval = getIsoPeaks(
   ncores = 6)
 
 orval_metadata = read_csv(file.path(orvaldata, '../tables/orval_spectra_metadata.csv'))
+
 orval_metadata = orval_metadata %>%
   group_by(sample_name) %>% mutate(n_replicates = n()) %>%
   filter(n_replicates==3)
+
 orval_samples = paste0(
   orval_metadata$sample_name, '_',
   orval_metadata$replicate

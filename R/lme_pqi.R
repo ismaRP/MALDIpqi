@@ -170,6 +170,7 @@ lme_pqi = function(q2e, logq=TRUE, g=NULL, outdir=NULL,
 #' @param new_q2e New q2e data for which PQI is predicted using the trained model
 #' q is stored in a column called "resp"
 #' @param logq whether q is in log-scale in q2e or new_q2e
+#' @param estimates
 #'
 #' @importFrom nlme lme ranef
 #' @importFrom dplyr mutate filter group_by summarise
@@ -199,7 +200,7 @@ predict_pqi = function(model, estimates, new_q2e=NULL, logq=T){
              Fitted0=fitted(model, level = 0),
              Res0=residuals(model, level = 0, type = "pearson")) %>%
       as_tibble()
-
+    return(list('pep'=q2e_m, 'sample'=pqi))
   } else {
     new_q2e = new_q2e %>%
       mutate(Sample = as.factor(Sample), Replicates = as.factor(Replicates),
@@ -217,7 +218,7 @@ predict_pqi = function(model, estimates, new_q2e=NULL, logq=T){
         estimates))
     q2e_m = new_q2e %>%
       mutate(
-        predicted_q = predict(model, new_q2e, asList=F)
+        predicted_q = predict(model, new_q2e)
       )
     if (logq){
       pqi = pqi %>% mutate(PQI.PredictSample = exp(PQI.PredictSample))
@@ -226,10 +227,9 @@ predict_pqi = function(model, estimates, new_q2e=NULL, logq=T){
       mutate(
         Pred = exp(predicted_q),
         Res = (resp-predicted_q)/sqrt(predicted_q))
-
+    return(list('sample'=pqi))
   }
 
-  return(list('pep'=q2e_m, 'sample'=pqi))
 }
 
 
