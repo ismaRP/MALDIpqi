@@ -9,6 +9,8 @@ predict_pqi(model, estimates, new_q2e = NULL, logq = T)
 \arguments{
 \item{model}{lme model object}
 
+\item{estimates}{}
+
 \item{new_q2e}{New q2e data for which PQI is predicted using the trained model
 q is stored in a column called "resp"}
 

@@ -36,17 +36,20 @@ data_folder = "data/mzML"
 results_folder = "results_test"
 ```
 
-This is minimal example of the workflow. It assumes the spectra are in
-data/mzML, in mzML format and with file names in the form
-“samplename_replicate.ext”. Where the replicate number is 1, 2 or 3 and
-ext is the extension of the files.
+This is minimal workflow. It assumes the spectra are in data/mzML, in
+mzML format and with file names in the form “samplename_replicate.ext”.
+Where the replicate number is 1, 2 or 3 and ext is the extension of the
+files.
 
 ``` r
 library(MALDIpqi)
 
+params = list(SNR=1.5, iterations=150, hws_smooth=8, halfWindowSize=20)
+
 iso_peaks = getIsoPeaks(
   indir=data_folder, outdir=NULL, readf="mzml",
-  peptides_user = NULL, nchunks = 50, n_isopeaks = 5, min_isopeaks = 4,
+  peptides_user = NULL, nchunks = 50, ncores = 1, iocores = 1,
+  n_isopeaks = 5, min_isopeaks = 4, iterations=150,
   smooth_method = "SavitzkyGolay", hws_smooth = 8, halfWindowSize = 20, SNR = 1.5)
 
 q2e = wls_q2e(peptides_user = NULL, n_isopeaks = 5,
@@ -61,11 +64,18 @@ res_fixed_gamma = lme_pqi(q2e, outdir=results_folder,
 
 If you want to run the samples using the inferred parameters from the
 Orval Dataset. You can skip the preprocessing of this dataset, which is
-the most time consuming and get the isotopic peaks using
-`get_ref_isopeaks()`. Then get the q2e and the linear mixed effect model
+the most time consuming and get the pre-computed isotopic peaks using
+`get_ref_isopeaks()`. This has been done for different combinations of
+parameters, that you can see with
 
-``` r
-iso_peaks_orval = get_ref_isopeaks()
+``` get_ref_isopeaks(which_params)```
+
+Then get the q2e and the linear mixed effect model
+
+
+```r
+# Extract reference iso_peaks calculated with parms
+iso_peaks_orval = get_ref_isopeaks(params=params)
 
 # Calculate q2e
 q2e_orval = wls_q2e(peptides_user = NULL, n_isopeaks = 5,
@@ -77,7 +87,7 @@ pqi_orval = lme_pqi(q2e_orval, logq = T, g = -1/2, return_model = T)
 q2e_new = q2e %>% mutate(resp=log(q))
 pqi_ucc = predict_pqi(
   q2e_new, estimates = pqi_orval$estimates, model = pqi_orval$model,
-  logq=T) # Here logq=T indicates that new data and model are log transformed
+  logq=T) # Here logq=T indicates that new data and model are already log transformed
 ```
 
 ## References

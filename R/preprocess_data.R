@@ -175,8 +175,11 @@ getIsoPeaks = function(indir,
 }
 
 
-#' Get isotopic peaks for reference dataset
-#'
+#' Get isotopic peaks from reference dataset
+#' @param list_params logical. If TRUE returns a dataframe of possible parameters
+#' for which iso peaks has been precomputed for the reference dataset
+#' @param params list of parameters and values for which the pre-computed iso_peaks is returned
+#' Parameters supported: SNR, iterations hws_smooth, halfWindowSize
 #' @return A list of dataframes, 1 per sample. Each dataframe has 3 columns,
 #' m/z, intensity and signal-to-noise ratio for each of the n_isopeaks from each
 #' peptide. Missing peaks are NAs.
@@ -186,7 +189,23 @@ getIsoPeaks = function(indir,
 #' @references
 #' Bethencourt, J.H. et al. (2022) ‘Data from “A biocodicological analysis of the medieval library and archive from Orval abbey, Belgium”’, Journal of open archaeology data, 10(0). doi:10.5334/joad.89.
 #' @examples
-get_ref_isopeaks = function(){
-  return(iso_peaks_orval)
+get_ref_isopeaks = function(which_params = F, params=NULL){
+  iso_peaks_params = lapply(
+    iso_peaks_list,
+    function(x) x$params
+  )
+  iso_peaks_params = do.call(bind_rows, iso_peaks_params)
+
+  if (which_params) {
+    return(iso_peaks_params)
+  }
+  if (is.null(params)) {
+    stop('Specify params')
+  }
+  if (is.list(params)) params = data.frame(params)
+  iso_peaks_params$idx = 1:nrow(iso_peaks_params)
+  params_use = merge(iso_peaks_params, params, all=F)
+
+  return(iso_peaks_list[[params_use$idx]])
 }
 

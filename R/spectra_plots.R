@@ -99,11 +99,11 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
 #' Smoothing factor for wavelet-based smoothing. Passed to \code{\link[MALDIrppa]{wavSmoothing}}
 #' @param hws_smooth
 #' Half-window size parameter for smoothening. Passed to \code{\link[MALDIquant]{smoothIntensity}}
-#' @param iter
+#' @param iterations
 #' Iterations parameter for baseline detection. Passed to \code{\link[MALDIquant]{estimateBaseline}}
-#' @param hws_peak
+#' @param halfWindowSize
 #' Half-window size parameter for local maximum detection. Passed to \code{\link[MALDIquant]{detectPeaks}}
-#' @param snr
+#' @param SNR
 #' Signal to noise threshold for peak detection. Passed to \code{\link[MALDIquant]{detectPeaks}}
 #' @param tol
 #' Tolerance factor for matching detected peaks to theoretical isotopic distribution.
@@ -135,9 +135,9 @@ plot_pept_spectra = function(indir,
                              smooth_method = c("SavitzkyGolay", "Wavelet"),
                              thresh.scale = 2.5,
                              hws_smooth = 8,
-                             iter= 20,
-                             hws_peak = 20,
-                             snr = 0,
+                             iterations= 20,
+                             halfWindowSize = 20,
+                             SNR = 0,
                              n_isopeaks = 5,
                              min_isopeaks = 4,
                              tol = 1.5e-4){
@@ -204,12 +204,12 @@ plot_pept_spectra = function(indir,
     #   s, method="SavitzkyGolay",
     #   halfWindowSize=hws_smooth)
     baseline = estimateBaseline(smoothened, method = 'SNIP',
-                                iterations = iter)
+                                iterations = iterations)
     baseline = baseline[,2]
-    s_br = removeBaseline(smoothened, 'SNIP', iterations = iter)
+    s_br = removeBaseline(smoothened, 'SNIP', iterations = iterations)
     noise = estimateNoise(s_br, 'SuperSmoother')[,2]
-    peaks = detectPeaks(s_br, halfWindowSize=hws_peak,
-                        method='SuperSmoother', SNR=snr)
+    peaks = detectPeaks(s_br, halfWindowSize=halfWindowSize,
+                        method='SuperSmoother', SNR=SNR)
 
     spectra_df = mapply(
       plot_preprocessing,

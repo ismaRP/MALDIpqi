@@ -27,4 +27,12 @@ orval_samples = paste0(
 )
 
 
+# iso_peaks_list = lapply(
+#   iso_peaks_list,
+#   function(x) {
+#     x$iso_peaks = x$iso_peaks[orval_samples]
+#     return(x)
+#   }
+# )
+
 iso_peaks_orval = iso_peaks_orval[orval_samples]

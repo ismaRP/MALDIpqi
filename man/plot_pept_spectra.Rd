@@ -15,9 +15,9 @@ plot_pept_spectra(
   smooth_method = c("SavitzkyGolay", "Wavelet"),
   thresh.scale = 2.5,
   hws_smooth = 8,
-  iter = 20,
-  hws_peak = 20,
-  snr = 0,
+  iterations = 20,
+  halfWindowSize = 20,
+  SNR = 0,
   n_isopeaks = 5,
   min_isopeaks = 4,
   tol = 0.00015
@@ -53,11 +53,11 @@ Wavelet uses \code{\link[MALDIrppa]{wavSmoothing}} together with
 
 \item{hws_smooth}{Half-window size parameter for smoothening. Passed to \code{\link[MALDIquant]{smoothIntensity}}}
 
-\item{iter}{Iterations parameter for baseline detection. Passed to \code{\link[MALDIquant]{estimateBaseline}}}
+\item{iterations}{Iterations parameter for baseline detection. Passed to \code{\link[MALDIquant]{estimateBaseline}}}
 
-\item{hws_peak}{Half-window size parameter for local maximum detection. Passed to \code{\link[MALDIquant]{detectPeaks}}}
+\item{halfWindowSize}{Half-window size parameter for local maximum detection. Passed to \code{\link[MALDIquant]{detectPeaks}}}
 
-\item{snr}{Signal to noise threshold for peak detection. Passed to \code{\link[MALDIquant]{detectPeaks}}}
+\item{SNR}{Signal to noise threshold for peak detection. Passed to \code{\link[MALDIquant]{detectPeaks}}}
 
 \item{n_isopeaks}{Number of isotopic peaks to pick. Default is 5 and the maximum permitted.}
 
