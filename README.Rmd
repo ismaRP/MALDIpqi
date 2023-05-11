@@ -32,7 +32,7 @@ You can install the released version of MALDIpqi from github with:
 
 ``` r
 install.packages('devtools')
-install.github("ismaRP/MALDIpqi")
+devtools::install_github("ismaRP/MALDIpqi")
 ```
 
 ## Example
