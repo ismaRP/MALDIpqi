@@ -179,7 +179,7 @@ getIsoPeaks = function(indir,
 #' @param list_params logical. If TRUE returns a dataframe of possible parameters
 #' for which iso peaks has been precomputed for the reference dataset
 #' @param params list of parameters and values for which the pre-computed iso_peaks is returned
-#' Parameters supported: SNR, iterations hws_smooth, halfWindowSize
+#' Parameters supported: SNR, iterations, hws_smooth, halfWindowSize
 #' @return A list of dataframes, 1 per sample. Each dataframe has 3 columns,
 #' m/z, intensity and signal-to-noise ratio for each of the n_isopeaks from each
 #' peptide. Missing peaks are NAs.

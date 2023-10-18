@@ -8,7 +8,7 @@ get_ref_isopeaks(which_params = F, params = NULL)
 }
 \arguments{
 \item{params}{list of parameters and values for which the pre-computed iso_peaks is returned
-Parameters supported: SNR, iterations hws_smooth, halfWindowSize}
+Parameters supported: SNR, iterations, hws_smooth, halfWindowSize}
 
 \item{list_params}{logical. If TRUE returns a dataframe of possible parameters
 for which iso peaks has been precomputed for the reference dataset}
