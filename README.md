@@ -26,7 +26,7 @@ You can install the released version of MALDIpqi from github with:
 
 ``` r
 install.packages('devtools')
-install.github("ismaRP/MALDIpqi")
+devoolt::install_github("ismaRP/MALDIpqi")
 ```
 
 ## Example
@@ -66,14 +66,11 @@ If you want to run the samples using the inferred parameters from the
 Orval Dataset. You can skip the preprocessing of this dataset, which is
 the most time consuming and get the pre-computed isotopic peaks using
 `get_ref_isopeaks()`. This has been done for different combinations of
-parameters, that you can see with
-
-``` get_ref_isopeaks(which_params)```
+parameters, that you can see with `get_ref_isopeaks(which_params)`
 
 Then get the q2e and the linear mixed effect model
 
-
-```r
+``` r
 # Extract reference iso_peaks calculated with parms
 iso_peaks_orval = get_ref_isopeaks(params=params)
 
