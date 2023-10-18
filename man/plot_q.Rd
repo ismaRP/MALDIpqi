@@ -10,7 +10,7 @@ plot_q(q2e, peptides_user = NULL, label_idx = 2, label_func = label_value)
 \item{q2e}{data.frame with q2e estimations per sample, replicate and peptide}
 
 \item{peptides_user}{A dataframe with peptide information. It must contain at least 3 columns,
-peptide number or ID, name, and m/z. If NULL, default are used, see\code{\link[MALDIutils]{getIsoPeaks}} details.
+peptide number or ID, name, and m/z. If NULL, default are used, see\code{\link[https://github.com/ismaRP/MALDIzooMS]{getIsoPeaks}} details.
 The number or ID must have the form Pep# and be in the first column.}
 
 \item{label_idx}{Column index in peptides where the label is stored}

@@ -79,7 +79,7 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
 #' @param spectra_names Character vector. Spectra names to plot
 #' @param peptides_user
 #' A dataframe with peptide information. It must contain at least 3 columns,
-#' peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[MALDIutils]{getIsoPeaks}} details.
+#' peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[https://github.com/ismaRP/MALDIzooMS]{getIsoPeaks}} details.
 #' The number or ID must have the form Pep# and be in the first column.
 #' @param label_idx Column index in peptides where the label is stored
 #' @param label_func labeller function to process labels. See \code{\link[ggplot2]{labeller}}
@@ -120,7 +120,7 @@ plot_preprocessing = function(m, p_name, s, s_br, p, baseline, noise, s_name,
 #' @importFrom ggplot2 xlab ylab theme element_text label_parsed
 #' @importFrom ggplot2 labeller as_labeller label_parsed
 #' @importFrom ggpubr ggarrange
-#' @importFrom MALDIutils importTsv importTable import_file.MzMl
+#' @importFrom MALDIzooMS importTsv importTable import_file.MzMl
 #' @importFrom magrittr %>%
 #' @importFrom dplyr bind_rows
 #' @importFrom readr read_lines

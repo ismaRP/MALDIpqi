@@ -6,10 +6,9 @@
 #' \code{\link[MALDIquant]{MassSpectrum}} object
 #' @param ...
 #' Parameters passed to the different preprocessing functions.
-#' See \code{\link{preprocess_data}}
 #' @return peaks list, with mass, intensity and s2n
 #' @importFrom MALDIquant smoothIntensity removeBaseline detectPeaks
-#' @importFrom MALDIutils peptidePseudoClusters
+#' @importFrom MALDIzooMS peptidePseudoClusters
 #' @export
 #'
 #' @examples
@@ -43,7 +42,7 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 #' @param readf
 #' A string value. Choose function used to read spectra.
 #' Currently restricted to one of "fread", "table" or "mzml".
-#' See \code{\link[MALDIutils]{preprocessData}} for more info.
+#' See \code{\link[https://github.com/ismaRP/MALDIzooMS]{preprocessData}} for more info.
 #' @param outdir
 #' Folder where one peaks file for each sample should be written.
 #' If NULL (default), no files are written.
@@ -88,7 +87,7 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
 #' m/z, intensity and signal-to-noise ratio for each of the n_isopeaks from each
 #' peptide. Missing peaks are NAs.
 #'
-#' @importFrom MALDIutils preprocessData prepFun
+#' @importFrom MALDIzooMS preprocessData prepFun
 #' @importFrom MALDIrppa wavSmoothing
 #' @importFrom parallel mcmapply detectCores mclapply
 #' @importFrom readr write_tsv

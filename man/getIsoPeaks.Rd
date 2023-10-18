@@ -31,7 +31,7 @@ getIsoPeaks(
 
 \item{readf}{A string value. Choose function used to read spectra.
 Currently restricted to one of "fread", "table" or "mzml".
-See \code{\link[MALDIutils]{preprocessData}} for more info.}
+See \code{\link[https://github.com/ismaRP/MALDIzooMS]{preprocessData}} for more info.}
 
 \item{sep}{Separator character for txt spectra files}
 

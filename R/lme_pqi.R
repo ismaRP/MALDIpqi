@@ -173,6 +173,7 @@ lme_pqi = function(q2e, logq=TRUE, g=NULL, outdir=NULL,
 #' @param estimates
 #'
 #' @importFrom nlme lme ranef
+#' @importFrom stats predict
 #' @importFrom dplyr mutate filter group_by summarise
 #' @importFrom tibble as_tibble
 #' @importFrom stats complete.cases fitted residuals
@@ -240,7 +241,7 @@ predict_pqi = function(model, estimates, new_q2e=NULL, logq=T){
 #' @param title Plot title
 #' @param peptides_user A dataframe with peptide information. It must contain at least 3 columns,
 #' peptide number or ID, name, and m/z. If NULL, default peptides are used.
-#' The number or ID must have the form Pep# and be in the first column.  See \code{\link[MALDIutils]{getIsoPeaks}} details.
+#' The number or ID must have the form Pep# and be in the first column.  See \code{\link[https://github.com/ismaRP/MALDIzooMS]{getIsoPeaks}} details.
 #' @param label_idx Index where to pull the labels from peptides
 #' @param label_func labeller function to process labels. See \code{\link[ggplot2]{labeller}}
 #' Default is label_value.
@@ -282,7 +283,7 @@ pept_qqplot = function(pqi_m, title="", peptides_user=NULL, label_idx=2,
 #' @param title Plot title
 #' @param peptides_user A dataframe with peptide information. It must contain at least 3 columns,
 #' peptide number or ID, name, and m/z. If NULL, default peptides are used.
-#' The number or ID must have the form Pep# and be in the first column. See \code{\link[MALDIutils]{getIsoPeaks}} details.
+#' The number or ID must have the form Pep# and be in the first column. See \code{\link[https://github.com/ismaRP/MALDIzooMS]{getIsoPeaks}} details.
 #' @param label_idx Index where to pull the labels from peptides
 #' @param label_func labeller function to process labels. See \code{\link[ggplot2]{labeller}}
 #' Default is label_value.

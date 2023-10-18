@@ -140,7 +140,7 @@ prepare_data = function(peptides_user=NULL, outdir=NULL, data_list=NULL, indir=N
 #' Given a list of tables, each contaning the peptide isotopic peaks per samples,
 #' this function uses weighted least squares to estimate q2e
 #' @param peptides_user A dataframe with peptide information. It must contain at least 3 columns,
-#' peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[MALDIutils]{getIsoPeaks}} details.
+#' peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[https://github.com/ismaRP/MALDIzooMS]{getIsoPeaks}} details.
 #' The number or ID must have the form Pep# and be in the first column.
 #' @param data_list list of isopeaks obtained from getIsoPeaks
 #' @param indir Path to lsit of isopeaks file is it was saved in a file
@@ -251,7 +251,7 @@ wls_q2e = function(peptides_user=NULL, data_list=NULL, indir=NULL,
 #'
 #' @param q2e data.frame with q2e estimations per sample, replicate and peptide
 #' @param peptides_user A dataframe with peptide information. It must contain at least 3 columns,
-#' peptide number or ID, name, and m/z. If NULL, default are used, see\code{\link[MALDIutils]{getIsoPeaks}} details.
+#' peptide number or ID, name, and m/z. If NULL, default are used, see\code{\link[https://github.com/ismaRP/MALDIzooMS]{getIsoPeaks}} details.
 #' The number or ID must have the form Pep# and be in the first column.
 #' @param label_idx Column index in peptides where the label is stored
 #' @param label_func labeller function to process labels. See \code{\link[ggplot2]{labeller}}

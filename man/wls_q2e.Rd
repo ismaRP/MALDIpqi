@@ -14,7 +14,7 @@ wls_q2e(
 }
 \arguments{
 \item{peptides_user}{A dataframe with peptide information. It must contain at least 3 columns,
-peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[MALDIutils]{getIsoPeaks}} details.
+peptide number or ID, name, and m/z. If NULL, default are used, see \code{\link[https://github.com/ismaRP/MALDIzooMS]{getIsoPeaks}} details.
 The number or ID must have the form Pep# and be in the first column.}
 
 \item{data_list}{list of isopeaks obtained from getIsoPeaks}
