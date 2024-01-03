@@ -40,4 +40,5 @@ BugReports: https://github.com/ismaRP/MALDIpqi/issues
 Depends: 
     R (>= 3.6)
 Remotes: 
-    github::ismaRP/MALDIzooMS
+    github::ismaRP/MALDIzooMS,
+    github::ismaRP/bacollite
