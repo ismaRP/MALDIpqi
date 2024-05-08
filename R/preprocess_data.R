@@ -8,7 +8,7 @@
 #' Parameters passed to the different preprocessing functions.
 #' @return peaks list, with mass, intensity and s2n
 #' @importFrom MALDIquant smoothIntensity removeBaseline detectPeaks
-#' @importFrom MALDIzooMS peptidePseudoClusters
+#' @importFrom MALDIzooMS peptide_pseudo_clusters
 #' @export
 #'
 #' @examples
@@ -22,7 +22,7 @@ preprocess_spectra = function(s, smoothf, iterations, halfWindowSize,
   # Estimate noise
   p = detectPeaks(s, halfWindowSize, method='SuperSmoother', SNR)
   # Extract peaks
-  p = peptidePseudoClusters(p, masses, tol, n_isopeaks, min_isopeaks)
+  p = peptide_pseudo_clusters(p, masses, tol, n_isopeaks, min_isopeaks)
   return(p)
 }
 
