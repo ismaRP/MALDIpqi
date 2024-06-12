@@ -35,12 +35,12 @@ Imports:
     data.table,
     MALDIrppa,
     MALDIzooMS (>= 0.1.0),
-    Spectra,
+    Spectra (>= 1.14.0),
     BiocParallel
 URL: https://github.com/ismaRP/MALDIpqi
 BugReports: https://github.com/ismaRP/MALDIpqi/issues
 Depends: 
-    R (>= 3.6)
+    R (>= 4.0)
 Remotes: 
     github::ismaRP/MALDIzooMS,
     github::ismaRP/bacollite

@@ -26,14 +26,40 @@ You can install the released version of MALDIpqi from github with:
 
 ``` r
 install.packages('devtools')
+#> Installing package into '/tmp/RtmpRxvg1B/temp_libpath23f4d680ddaa7'
+#> (as 'lib' is unspecified)
+# We need to tell R to also look in Bioconductor for the packages Spectra and mzR
+setRepositories(ind=1:2)
 devtools::install_github("ismaRP/MALDIpqi")
+#> Using GitHub PAT from the git credential store.
+#> Downloading GitHub repo ismaRP/MALDIpqi@HEAD
+#> rlang     (1.1.3 -> 1.1.4 ) [CRAN]
+#> evaluate  (0.23  -> 0.24.0) [CRAN]
+#> farver    (2.1.1 -> 2.1.2 ) [CRAN]
+#> SparseM   (1.81  -> 1.83  ) [CRAN]
+#> minqa     (1.2.6 -> 1.2.7 ) [CRAN]
+#> quantreg  (5.97  -> 5.98  ) [CRAN]
+#> backports (1.4.1 -> 1.5.0 ) [CRAN]
+#> waveslim  (1.8.4 -> 1.8.5 ) [CRAN]
+#> ggsci     (3.0.3 -> 3.1.0 ) [CRAN]
+#> Installing 9 packages: rlang, evaluate, farver, SparseM, minqa, quantreg, backports, waveslim, ggsci
+#> Installing packages into '/tmp/RtmpRxvg1B/temp_libpath23f4d680ddaa7'
+#> (as 'lib' is unspecified)
+#> ── R CMD build ─────────────────────────────────────────────────────────────────
+#> * checking for file ‘/tmp/RtmpXlcebm/remotes24c761dd0697a/ismaRP-MALDIpqi-95f47d6/DESCRIPTION’ ... OK
+#> * preparing ‘MALDIpqi’:
+#> * checking DESCRIPTION meta-information ... OK
+#> * checking for LF line-endings in source and make files and shell scripts
+#> * checking for empty or unneeded directories
+#> * building ‘MALDIpqi_0.0.1.tar.gz’
+#> Installing package into '/tmp/RtmpRxvg1B/temp_libpath23f4d680ddaa7'
+#> (as 'lib' is unspecified)
 ```
 
 ## Example
 
 ``` r
 data_folder = "data/mzML"
-results_folder = "results_test"
 ```
 
 This is minimal workflow. It assumes the spectra are in data/mzML, in
@@ -42,49 +68,38 @@ Where the replicate number is 1, 2 or 3 and ext is the extension of the
 files.
 
 ``` r
-library(MALDIpqi)
+# Read metadata and remove rows that don't have a corresponding mzML file
+zooms_metadata = read_csv('./metadata.csv')
+zooms_metadata = clean_metadata(zooms_metadata, data_folder)
 
-params = list(SNR=1.5, iterations=150, hws_smooth=8, halfWindowSize=20)
+# Read peptides, or don't provide to use default
+peptides = read_csv('peptides.csv'))
 
-iso_peaks = getIsoPeaks(
-  indir=data_folder, outdir=NULL, readf="mzml",
-  peptides_user = NULL, nchunks = 50, ncores = 1, iocores = 1,
-  n_isopeaks = 5, min_isopeaks = 4, iterations=150,
-  smooth_method = "SavitzkyGolay", hws_smooth = 8, halfWindowSize = 20, SNR = 1.5)
+# Preprocess spectra
+peaks = MALDIpqi::preprocess_spectra(
+  indir = data_folder, metadata = zooms_metadata,
+  mono_masses = peptides$mass,
+  smooth_wma_hws = 4,
+  smooth_sg_hws = 6,
+  iterations = 50,
+  halfWindowSize = 20,
+  snr = 2, k = 0L, threshold = 0.33,
+  local_bg = FALSE,
+  mass_range = 100, bg_cutoff = 0.5, l_cutoff = 1e-8,
+  tolerance = 0.4, ppm = 50,
+  n_isopeaks = 5,
+  min_isopeaks = 4,
+  ncores = 6, chunk_size = 60
+)
+peaks = prepare_peaks(peaks, peptides, n_isopeaks = 5)
 
-q2e = wls_q2e(peptides_user = NULL, n_isopeaks = 5,
-              data_list = iso_peaks, outdir=results_folder)
+# Calculate q2e for each sample, replicate and peptide
+q2e_vals = peaks %>% filter(n_peaks > 0) %>%
+  group_by(sample, replicate, pep_number) %>%
+  summarise(wlm_q2e(norm_int, weight, deam_0, deam_1, deam_2))
 
-# EStimate free gamma model or fixed to -1/2
-res_free_gamma = lme_pqi(q2e, outdir=results_folder,
-                         logq = T, n_isopeaks=5, g="free")
-res_fixed_gamma = lme_pqi(q2e, outdir=results_folder,
-                          logq = T, n_isopeaks=5, g=-1/2)
-```
-
-If you want to run the samples using the inferred parameters from the
-Orval Dataset. You can skip the preprocessing of this dataset, which is
-the most time consuming and get the pre-computed isotopic peaks using
-`get_ref_isopeaks()`. This has been done for different combinations of
-parameters, that you can see with `get_ref_isopeaks(which_params)`
-
-Then get the q2e and the linear mixed effect model
-
-``` r
-# Extract reference iso_peaks calculated with parms
-iso_peaks_orval = get_ref_isopeaks(params=params)
-
-# Calculate q2e
-q2e_orval = wls_q2e(peptides_user = NULL, n_isopeaks = 5,
-                    data_list = iso_peaks_orval)
-# Estimate LME model
-pqi_orval = lme_pqi(q2e_orval, logq = T, g = -1/2, return_model = T)
-
-# Get q2e from new data and log transform
-q2e_new = q2e %>% mutate(resp=log(q))
-pqi_ucc = predict_pqi(
-  q2e_new, estimates = pqi_orval$estimates, model = pqi_orval$model,
-  logq=T) # Here logq=T indicates that new data and model are already log transformed
+# Calculate PQI
+pqi_vals = lme_pqi(q2e_vals, logq = TRUE, g = 'free', return_model = TRUE)
 ```
 
 ## References
