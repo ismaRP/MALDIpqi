@@ -4,16 +4,16 @@
 \alias{lme_pqi}
 \title{Calculate PQI using linear mixed effect model from q2e estimates}
 \usage{
-lme_pqi(q2e, logq = TRUE, g = NULL, outdir = NULL, return_model = F)
+lme_pqi(q2e_vals, logq = TRUE, g = NULL, outdir = NULL, return_model = F)
 }
 \arguments{
-\item{q2e}{data.frame with q2e estimations per sample, replicate and peptide}
-
 \item{logq}{Whether q values are log-scaled before entering the LME model}
 
 \item{g}{Reliability power in the error normal distribution from linear mixed effects model}
 
 \item{outdir}{Optional. directory where results tables and plots are saved}
+
+\item{q2e}{data.frame with q2e estimations per sample, replicate and peptide}
 }
 \value{
 list contaning the following:

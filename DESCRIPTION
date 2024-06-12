@@ -34,7 +34,9 @@ Imports:
     stats,
     data.table,
     MALDIrppa,
-    MALDIzooMS (>= 0.1.0)
+    MALDIzooMS (>= 0.1.0),
+    Spectra,
+    BiocParallel
 URL: https://github.com/ismaRP/MALDIpqi
 BugReports: https://github.com/ismaRP/MALDIpqi/issues
 Depends: 

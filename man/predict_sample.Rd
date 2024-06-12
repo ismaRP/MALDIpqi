@@ -4,7 +4,7 @@
 \alias{predict_sample}
 \title{Title}
 \usage{
-predict_sample(Sample, Replicates, Peptides, Reliability, resp, pars)
+predict_sample(sample, replicate, pep_number, residual, resp, pars)
 }
 \arguments{
 \item{resp}{Response variable, either q or Logq}
