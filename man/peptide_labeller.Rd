@@ -2,7 +2,8 @@
 % Please edit documentation in R/util_functions.R
 \name{peptide_labeller}
 \alias{peptide_labeller}
-\title{Title}
+\title{Labeler helper for plotting peptide spectra
+Title}
 \usage{
 peptide_labeller(values)
 }
@@ -10,5 +11,6 @@ peptide_labeller(values)
 \item{values}{}
 }
 \description{
+Labeler helper for plotting peptide spectra
 Title
 }

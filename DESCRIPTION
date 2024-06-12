@@ -16,7 +16,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Imports: 
     MALDIquant,
     bacollite,
@@ -34,7 +34,9 @@ Imports:
     stats,
     data.table,
     MALDIrppa,
-    MALDIzooMS (>= 0.1.0)
+    MALDIzooMS (>= 0.1.0),
+    Spectra,
+    BiocParallel
 URL: https://github.com/ismaRP/MALDIpqi
 BugReports: https://github.com/ismaRP/MALDIpqi/issues
 Depends: 
