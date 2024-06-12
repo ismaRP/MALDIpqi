@@ -26,34 +26,9 @@ You can install the released version of MALDIpqi from github with:
 
 ``` r
 install.packages('devtools')
-#> Installing package into '/tmp/RtmpRxvg1B/temp_libpath23f4d680ddaa7'
-#> (as 'lib' is unspecified)
 # We need to tell R to also look in Bioconductor for the packages Spectra and mzR
 setRepositories(ind=1:2)
 devtools::install_github("ismaRP/MALDIpqi")
-#> Using GitHub PAT from the git credential store.
-#> Downloading GitHub repo ismaRP/MALDIpqi@HEAD
-#> rlang     (1.1.3 -> 1.1.4 ) [CRAN]
-#> evaluate  (0.23  -> 0.24.0) [CRAN]
-#> farver    (2.1.1 -> 2.1.2 ) [CRAN]
-#> SparseM   (1.81  -> 1.83  ) [CRAN]
-#> minqa     (1.2.6 -> 1.2.7 ) [CRAN]
-#> quantreg  (5.97  -> 5.98  ) [CRAN]
-#> backports (1.4.1 -> 1.5.0 ) [CRAN]
-#> waveslim  (1.8.4 -> 1.8.5 ) [CRAN]
-#> ggsci     (3.0.3 -> 3.1.0 ) [CRAN]
-#> Installing 9 packages: rlang, evaluate, farver, SparseM, minqa, quantreg, backports, waveslim, ggsci
-#> Installing packages into '/tmp/RtmpRxvg1B/temp_libpath23f4d680ddaa7'
-#> (as 'lib' is unspecified)
-#> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/RtmpXlcebm/remotes24c761dd0697a/ismaRP-MALDIpqi-95f47d6/DESCRIPTION’ ... OK
-#> * preparing ‘MALDIpqi’:
-#> * checking DESCRIPTION meta-information ... OK
-#> * checking for LF line-endings in source and make files and shell scripts
-#> * checking for empty or unneeded directories
-#> * building ‘MALDIpqi_0.0.1.tar.gz’
-#> Installing package into '/tmp/RtmpRxvg1B/temp_libpath23f4d680ddaa7'
-#> (as 'lib' is unspecified)
 ```
 
 ## Example

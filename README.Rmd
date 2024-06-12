@@ -30,7 +30,7 @@ The method was initially developed to estimate parchment quality based on deamid
 
 You can install the released version of MALDIpqi from github with:
 
-```{r}
+```{r, eval=FALSE}
 install.packages('devtools')
 # We need to tell R to also look in Bioconductor for the packages Spectra and mzR
 setRepositories(ind=1:2)
@@ -39,7 +39,7 @@ devtools::install_github("ismaRP/MALDIpqi")
 
 ## Example
 
-```{r load, eval=T}
+```{r}
 data_folder = "data/mzML"
 ```
 
