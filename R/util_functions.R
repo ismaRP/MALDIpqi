@@ -93,11 +93,11 @@ get_isodists = function(seqs, ndeam, nhyds, long_format=F){
 #' @export
 #' @importFrom tibble tibble
 #' @examples
-predict_sample <- function(sample, replicate, pep_number, residual, resp, pars) {
+predict_sample <- function(sample, replicate, pep_number, reliability, resp, pars) {
 
   data_I_s = data.frame(
     sample = sample, replicate = replicate, pep_number = pep_number,
-    residual = residual, resp = resp)
+    reliability = reliability, resp = resp)
 
   alpha = pars$alpha
   sigma2_S = pars$sigma2_S
@@ -115,16 +115,18 @@ predict_sample <- function(sample, replicate, pep_number, residual, resp, pars) 
     # build Xi
     Xi = sigma2_S * matrix(1, nrow(data_I_s), nrow(data_I_s)) +
       sigma2_R * outer(data_I_s$replicate, data_I_s$replicate, function(x,y){as.numeric(x == y)}) +
-      diag((data_I_s$residual^(2*gamma)) * sigma2[as.character(data_I_s$pep_number)], nrow = nrow(data_I_s))
+      diag((data_I_s$reliability^(2*gamma)) * sigma2[as.character(data_I_s$pep_number)], nrow = nrow(data_I_s))
     # prediction
-    E_X = sigma2_S * sum(solve(Xi, data_I_s$resp - alpha[as.character(data_I_s$pep_number)]))
+    # We don't need the estimate, as the ranef function provides it
+    # E_X = sigma2_S * sum(solve(Xi, data_I_s$resp - alpha[as.character(data_I_s$pep_number)]))
     # variance
     var_X = sigma2_S - (sigma2_S^2) * sum(solve(Xi, rep(1, nrow(data_I_s))))
   }
 
   # return
-  names(E_X) = names(var_X) <- NULL
-  return(tibble(PQI.PredictSample = E_X, sd = sqrt(var_X)))
+  # names(E_X) = names(var_X) <- NULL
+  # return(tibble(PQI.PredictSample = E_X, sd = sqrt(var_X)))
+  return(tibble(sd = sqrt(var_X)))
 }
 
 

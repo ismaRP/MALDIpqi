@@ -22,8 +22,12 @@ lm_q2e_intercept = function(norm_int = NULL,
                             deam_0 = NULL, deam_1 = NULL, deam_2 = NULL,
                             data = NULL,
                             return_model = FALSE) {
-  if (!is.null(data)) norm_int = data$norm_int
-  if (all(is.na(norm_int))) {
+  if (!is.null(data)) {
+    if (all(is.na(data$norm_int))) allna = TRUE else allna = FALSE
+  } else {
+    if (all(is.na(norm_int))) allna = TRUE else allna = FALSE
+  }
+  if (allna) {
     q2e = NA
     intercept = NA
     gamma_0 = NA
@@ -40,9 +44,9 @@ lm_q2e_intercept = function(norm_int = NULL,
     gamma_0 = lm_model$coefficients[2]
     gamma_1 = lm_model$coefficients[3]
     gamma_2 = lm_model$coefficients[4]
-    if(is.na(gamma_2)) gamma_2 = 0
+    if (is.na(gamma_2)) gamma_2 = 0
     q2e = 1 - (gamma_0/(gamma_0 + gamma_1 + gamma_2))
-    residual = sqrt(sum(lm_model$residuals^2)/(lm_model$df.residual))
+    residual = sqrt(sum(lm_model$residuals^2))/sum(!is.na(norm_int), na.rm = TRUE)
   }
   return(data.frame(q2e=q2e, intercept=intercept,
                     gamma_0=gamma_0, gamma_1=gamma_1, gamma_2=gamma_2,
@@ -71,8 +75,14 @@ wlm_q2e_intercept = function(norm_int = NULL, weight = NULL,
                              deam_0 = NULL, deam_1 = NULL, deam_2 = NULL,
                              data = NULL,
                              return_model = FALSE) {
-  if (!is.null(data)) norm_int = data$norm_int
-  if (all(is.na(norm_int))) {
+  if (!is.null(data)) {
+    data$weight = data$weight / sum(data$weight, na.rm = TRUE)
+    if (all(is.na(data$norm_int))) allna = TRUE else allna = FALSE
+  } else {
+    weight = weight /sum(weight, na.rm = TRUE)
+    if (all(is.na(norm_int))) allna = TRUE else allna = FALSE
+  }
+  if (allna) {
     q2e = NA
     intercept = NA
     gamma_0 = NA
@@ -92,7 +102,7 @@ wlm_q2e_intercept = function(norm_int = NULL, weight = NULL,
     gamma_2 = lm_model$coefficients[4]
     if(is.na(gamma_2)) gamma_2 = 0
     q2e = 1 - (gamma_0/(gamma_0 + gamma_1 + gamma_2))
-    residual = sqrt(sum(lm_model$residuals^2)/(lm_model$df.residual))
+    residual = sqrt(sum(lm_model$weights * lm_model$residuals^2))
   }
   return(data.frame(q2e=q2e, intercept=intercept,
                     gamma_0=gamma_0, gamma_1=gamma_1, gamma_2=gamma_2,
@@ -122,8 +132,14 @@ wlm_q2e = function(norm_int = NULL, weight = NULL,
                    deam_0 = NULL, deam_1 = NULL, deam_2 = NULL,
                    data = NULL,
                    return_model = FALSE) {
-  if (!is.null(data)) norm_int = data$norm_int
-  if (all(is.na(norm_int))) {
+  if (!is.null(data)) {
+    data$weight = data$weight / sum(data$weight, na.rm = TRUE)
+    if (all(is.na(data$norm_int))) allna = TRUE else allna = FALSE
+  } else {
+    weight = weight /sum(weight, na.rm = TRUE)
+    if (all(is.na(norm_int))) allna = TRUE else allna = FALSE
+  }
+  if (allna) {
     q2e = NA
     gamma_0 = NA
     gamma_1 = NA
@@ -141,7 +157,7 @@ wlm_q2e = function(norm_int = NULL, weight = NULL,
     gamma_2 = lm_model$coefficients[3]
     if(is.na(gamma_2)) gamma_2 = 0
     q2e = 1 - (gamma_0/(gamma_0 + gamma_1 + gamma_2))
-    residual = sqrt(sum(lm_model$residuals^2)/(lm_model$df.residual))
+    residual = sqrt(sum(lm_model$weights * lm_model$residuals^2))
   }
   return(data.frame(q2e=q2e,
                     gamma_0=gamma_0, gamma_1=gamma_1, gamma_2=gamma_2,
@@ -170,8 +186,12 @@ lm_q2e = function(norm_int = NULL,
                   deam_0 = NULL, deam_1 = NULL, deam_2 = NULL,
                   data = NULL,
                   return_model = FALSE) {
-  if (!is.null(data)) norm_int = data$norm_int
-  if (all(is.na(norm_int))) {
+  if (!is.null(data)) {
+    if (all(is.na(data$norm_int))) allna = TRUE else allna = FALSE
+  } else {
+    if (all(is.na(norm_int))) allna = TRUE else allna = FALSE
+  }
+  if (allna) {
     q2e = NA
     gamma_0 = NA
     gamma_1 = NA
@@ -188,7 +208,7 @@ lm_q2e = function(norm_int = NULL,
     gamma_2 = lm_model$coefficients[3]
     if(is.na(gamma_2)) gamma_2 = 0
     q2e = 1 - (gamma_0/(gamma_0 + gamma_1 + gamma_2))
-    residual = sqrt(sum(lm_model$residuals^2)/(lm_model$df.residual))
+    residual = sqrt(sum(lm_model$residuals^2))/sum(!is.na(norm_int), na.rm = TRUE)
   }
   return(data.frame(q2e=q2e,
                     gamma_0=gamma_0, gamma_1=gamma_1, gamma_2=gamma_2,

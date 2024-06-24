@@ -29,8 +29,8 @@ list contaning the following:
 \item sd: log(PQI) standard error
 \item RanefModel: sample random effects, as calculated by \code{\link[nlme]{ranef}}.
 It should be the same as Prediction, up to numerical precision
-\item PQI.PredictSample and PQI.Model, exponentials of Prediction and RanefModel respectively.
-They contain the PQI
+\item PQI.Model, exponentials estimates. It is the PQI
+
 }
 
 \code{pep} data.frame contains:

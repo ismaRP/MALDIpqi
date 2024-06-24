@@ -4,10 +4,10 @@
 \alias{plot_n_peaks_per_peptide}
 \title{Title}
 \usage{
-plot_n_peaks_per_peptide(peaks, n_isopeaks, min_isopeaks)
+plot_n_peaks_per_peptide(peaks, n_isopeaks, min_isopeaks, ...)
 }
 \arguments{
-\item{min_isopeaks}{}
+\item{...}{}
 }
 \description{
 Title

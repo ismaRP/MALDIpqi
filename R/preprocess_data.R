@@ -256,15 +256,16 @@ calc_n_frac_peaks = function(x, n_isopeaks, min_isopeaks) {
 #' @param peaks
 #' @param n_isopeaks
 #' @param min_isopeaks
+#' @param ...
 #'
 #' @return
 #' @export
 #'
 #' @examples
-plot_n_peaks_per_peptide = function(peaks, n_isopeaks, min_isopeaks) {
+plot_n_peaks_per_peptide = function(peaks, n_isopeaks, min_isopeaks, ...) {
 
   a = peaks %>%
-    group_by(pep_number) %>%
+    group_by(pep_number, ...) %>%
     summarise(calc_n_frac_peaks(n_peaks, n_isopeaks, min_isopeaks)) %>%
     ungroup() %>%
     pivot_longer(cols = starts_with('frac'), names_to='n_of_peaks',
@@ -273,7 +274,8 @@ plot_n_peaks_per_peptide = function(peaks, n_isopeaks, min_isopeaks) {
            pep_number = as.factor(pep_number))
 
   ggplot(a) +
-    geom_col(aes(x=pep_number, y=fraction, fill=n_of_peaks))
+    geom_col(aes(x=pep_number, y=fraction, fill=n_of_peaks)) +
+    facet_wrap(vars(...))
 }
 
 

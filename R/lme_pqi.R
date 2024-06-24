@@ -1,6 +1,4 @@
 
-
-
 #' Calculate PQI using linear mixed effect model from q2e estimates
 #'
 #' @param q2e data.frame with q2e estimations per sample, replicate and peptide
@@ -22,8 +20,8 @@
 #'   \item sd: log(PQI) standard error
 #'   \item RanefModel: sample random effects, as calculated by \code{\link[nlme]{ranef}}.
 #'         It should be the same as Prediction, up to numerical precision
-#'   \item PQI.PredictSample and PQI.Model, exponentials of Prediction and RanefModel respectively.
-#'         They contain the PQI
+#'   \item PQI.Model, exponentials estimates. It is the PQI
+#'
 #' }
 #'
 #' \code{pep} data.frame contains:
@@ -70,18 +68,19 @@ lme_pqi = function(q2e_vals, logq=TRUE, g=NULL, outdir=NULL,
   if (g == "free"){
     m = lme(
       resp~0+pep_number,
-      random=~1|sample/replicate,
-      weights=varComb(varPower(-1/2, form=~residual),
-                      varIdent(form=~1|pep_number)),
-      control=lmeControl(maxIter = 1000, msMaxIter = 1000, msMaxEval = 1000),
-      data=q2e_vals)
+      random = ~1|sample/replicate,
+      weights = varComb(
+        varPower(-1/2, form = ~reliability),
+        varIdent(form = ~1|pep_number)),
+      control = lmeControl(maxIter = 1000, msMaxIter = 1000, msMaxEval = 1000),
+      data = q2e_vals)
   } else {
     m = lme(
       resp~0+pep_number,
-      random=~1|sample/replicate,
-      weight=varComb(
-        varFixed(~I(1/residual)),
-        varIdent(form=~1|pep_number)
+      random = ~1|sample/replicate,
+      weight = varComb(
+        varFixed(~I(1/reliability)),
+        varIdent(form = ~1|pep_number)
       ),
       control=lmeControl(maxIter = 1000, msMaxIter = 1000, msMaxEval = 1000),
       data=q2e_vals)
@@ -174,11 +173,11 @@ predict_pqi = function(model, estimates, new_q2e=NULL, logq=T){
     q2e = model$data
     pqi = q2e %>% group_by(sample) %>%
       summarise(predict_sample(
-        sample, replicate, pep_number, residual, resp, estimates)) %>%
+        sample, replicate, pep_number, reliability, resp, estimates)) %>%
       mutate(PQI.Model = ranef(model)[['sample']][,1])
     if (logq) {
       pqi = pqi %>% mutate(
-        PQI.PredictSample = exp(PQI.PredictSample),
+        # PQI.PredictSample = exp(PQI.PredictSample),
         PQI.Model = exp(PQI.Model)
       )
     }
@@ -197,7 +196,7 @@ predict_pqi = function(model, estimates, new_q2e=NULL, logq=T){
 
     pqi = new_q2e %>% group_by(sample) %>%
       summarise(predict_sample(
-        sample, replicate, pep_number, residual, resp, estimates))
+        sample, replicate, pep_number, reliability, resp, estimates))
     q2e_m = new_q2e %>%
       mutate(
         predicted_q = predict(model, new_q2e)
