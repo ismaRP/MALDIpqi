@@ -121,7 +121,8 @@ preprocess_spectra = function(
     sps_mzr = addProcessing(
       sps_mzr, MALDIzooMS::peak_detection, halfWindowSize = 20L,
       method = 'SuperSmoother', snr = snr, k = k, threshold = threshold,
-      descending = TRUE, int_index = 'intensity_SavitzkyGolay_bl_corr_SNIP')
+      descending = TRUE, int_index = 'intensity_SavitzkyGolay_bl_corr_SNIP',
+      add_snr=TRUE)
   } else {
     # Baseline estimation on MA smoothed
     sps_mzr = addProcessing(
@@ -132,7 +133,8 @@ preprocess_spectra = function(
     sps_mzr = addProcessing(
       sps_mzr, MALDIzooMS::peak_detection, halfWindowSize = 20L,
       method = 'SuperSmoother', snr = snr, k = k, threshold = threshold,
-      descending = TRUE, int_index = 'intensity_SavitzkyGolay')
+      descending = TRUE, int_index = 'intensity_SavitzkyGolay',
+      add_snr=TRUE)
   }
 
   if (local_bg) {
@@ -158,7 +160,22 @@ preprocess_spectra = function(
 
 }
 
-
+#' Normalize vector of intensities by the maximum
+#'
+#' @param intensity Vector of intensities
+#'
+#' @return
+#' @export
+#'
+#' @examples
+normalize_intensity = function(intensity) {
+  if (all(is.na(intensity))) {
+    norm_int = rep(NA, length(intensity))
+  } else {
+    norm_int = intensity/max(intensity, na.rm = TRUE)
+  }
+  return(norm_int)
+}
 
 #' Prepare list of peaks data into a data.frame
 #' @param peaks List of peaks matrix. Names are used as spectra name
@@ -220,7 +237,7 @@ prepare_peaks = function(peaks, peptides_user, n_isopeaks) {
   peaks = peaks %>%
     arrange(sample, replicate, pep_idx, mass_pos) %>%
     group_by(spectra_name, pep_idx) %>%
-    mutate(norm_int = intensity/max(intensity, na.rm = TRUE),
+    mutate(norm_int = normalize_intensity(intensity),
            n_peaks = sum(!is.na(intensity))) %>%
     ungroup() %>%
     mutate(intensity = replace(intensity, is.na(intensity), 0),
