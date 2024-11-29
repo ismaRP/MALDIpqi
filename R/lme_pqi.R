@@ -247,6 +247,7 @@ pept_qqplot = function(pqi_m, title="", peptides_user=NULL, label_idx=2,
     facet_wrap(
       ~pep_number,
       labeller = labeller(pep_number = as_labeller(pept_labels, label_func))) +
+    theme_bw() +
     theme(legend.key.size=unit(1, "cm"),
           legend.text = element_text(size = 15),
           strip.text = element_text(size = 10)) +
@@ -291,6 +292,7 @@ fvsr = function(pqi_m, title="", peptides_user=NULL, label_idx=2,
       labeller = labeller(pep_number = as_labeller(pept_labels, label_func))) +
     ylab("standardized residuals") +
     xlab("predicted q peptide") +
+    theme_bw() +
     theme(legend.key.size=unit(1, "cm"),
           legend.text = element_text(size = 15),
           strip.text = element_text(size = 10)) +

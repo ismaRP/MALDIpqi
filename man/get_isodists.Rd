@@ -4,7 +4,7 @@
 \alias{get_isodists}
 \title{Get isotopic distributions}
 \usage{
-get_isodists(seqs, ndeam, nhyds, long_format = F)
+get_isodists(seqs, ndeam, nhyds, long_format = F, q2e = NULL)
 }
 \arguments{
 \item{nhyds}{Integer, vector}

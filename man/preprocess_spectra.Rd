@@ -8,7 +8,7 @@ preprocess_spectra(
   indir,
   metadata,
   make_plots = FALSE,
-  mono_masses = NULL,
+  peptides_user = NULL,
   smooth_wma_hws = 4,
   smooth_sg_hws = 6,
   iterations = 50,
@@ -33,8 +33,6 @@ preprocess_spectra(
 
 \item{metadata}{Data frame with spectra metadata with at least \code{file}
 column. Ideally metadata has been cleaned before with \link[MALDIzooMS:clean_metadata]{MALDIzooMS::clean_metadata}}
-
-\item{mono_masses}{Array with the peptides monoisotopics masses}
 
 \item{smooth_wma_hws}{Half-window size for WeightedMovingAverage smoothing method}
 
@@ -75,6 +73,8 @@ and detected peaks. See \link[MsCoreUtils:matching]{MsCoreUtils::closest}}
 are detected, the whole isotopic envelope is discarded. Default is 4}
 
 \item{ncores}{Number of cores used by the \link[Spectra:MsBackend]{Spectra::MsBackendMzR} backend in \link[Spectra:peaksData]{Spectra::peaksData}}
+
+\item{mono_masses}{Array with the peptides monoisotopics masses}
 }
 \value{
 A list of dataframes, 1 per sample. Each dataframe has 3 columns,

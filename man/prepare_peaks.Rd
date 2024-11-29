@@ -4,7 +4,13 @@
 \alias{prepare_peaks}
 \title{Prepare list of peaks data into a data.frame}
 \usage{
-prepare_peaks(peaks, peptides_user, n_isopeaks)
+prepare_peaks(
+  peaks,
+  peptides_user,
+  n_isopeaks,
+  int_column = "intensity",
+  q2e = NULL
+)
 }
 \arguments{
 \item{peaks}{List of peaks matrix. Names are used as spectra name}
@@ -14,6 +20,9 @@ prepare_peaks(peaks, peptides_user, n_isopeaks)
 IF NULL, default are used, see details.}
 
 \item{n_isopeaks}{Number of isotopic peaks}
+
+\item{q2e}{Optional q2e value to calculate the theoretical distribution of
+a peptide with this extent of deamidation}
 }
 \value{
 A data.frame with isotopic peaks detected from data, theoretical isotopic
