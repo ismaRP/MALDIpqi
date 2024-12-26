@@ -22,7 +22,7 @@ peptide_labeller = function(values){
 #'
 #' @examples
 print_progress = function(msg, verbose) {
-  if (verbose) cat(msg)
+  if (verbose) message(msg)
 }
 
 #' Calculate the coefficients of each of the non or deamidated peptides

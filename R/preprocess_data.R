@@ -7,6 +7,11 @@
 #' @param indir Folder containing spectra in mzML format.
 #' @param metadata Data frame with spectra metadata with at least \code{file}
 #' column. Ideally metadata has been cleaned before with [MALDIzooMS::clean_metadata]
+#' @param mzml_files Paths to mzML files
+#' @param spectrum_file_name If mzml_files are provided, whether to use file names
+#' as spectra names. Otherwise, it is assumed the the spectra IDs are in the mzML
+#' files' headers.
+#' @param sps_mzr Spectra object
 #' @param mono_masses
 #' Array with the peptides monoisotopics masses
 #' @param smooth_wma_hws
@@ -58,6 +63,11 @@
 #' @return A list of dataframes, 1 per sample. Each dataframe has 3 columns,
 #' m/z, intensity and signal-to-noise ratio for each of the n_isopeaks from each
 #' peptide. Missing peaks are NAs.
+#' @details
+#' Provide the input data either using `metadata` and `indir`, or provide paths
+#' with `mzml_files`. You can also provide a `Spectra` object directly in `sps_mzr`.
+#' If data is provided using more than one of the options, the `sps_mzr` is used, and then the `mzml_files`.
+#'
 #'
 #' @importFrom MALDIzooMS get_spectra_name clean_metadata
 #' @importFrom MALDIzooMS smooth baseline_correction peak_detection
@@ -74,7 +84,9 @@
 #' Nair, B. et al. (2022) ‘Parchment Glutamine Index (PQI): A novel method to estimate glutamine deamidation levels in parchment collagen obtained from low-quality MALDI-TOF data’, bioRxiv. doi:10.1101/2022.03.13.483627.
 #'
 preprocess_spectra = function(
-    indir, metadata,
+    indir=NULL, metadata=NULL,
+    mzml_files=NULL, spectrum_name_file=FALSE,
+    sps_mzr=NULL,
     make_plots = FALSE,
     peptides_user = NULL,
     smooth_wma_hws = 4,
@@ -98,23 +110,39 @@ preprocess_spectra = function(
   mono_masses = peptides_user$mass
   if (is.null(ncores)) ncores = detectCores() - 2
 
-  metadata = clean_metadata(metadata, indir)
-  mzml_files = file.path(indir, metadata$file)
 
   if (ncores == 1) {
-    param = SerialParam(progressbar = FALSE)
+    param = SerialParam(progressbar = verbose)
   } else if (.Platform$OS.type == "windows") {
-    param = SnowParam(workers=ncores, progressbar = FALSE)
+    param = SnowParam(workers=ncores, progressbar = verbose)
   } else {
-    param = MulticoreParam(workers=ncores, progressbar = FALSE)
+    param = MulticoreParam(workers=ncores, progressbar = verbose)
   }
 
-  sps_mzr = suppressMessages(
-    Spectra(mzml_files, source = MsBackendMzR(), centroided = FALSE,
-            BPPARAM = param))
+  if (is.null(sps_mzr) & is.null(mzml_files) & !(is.null(metadata) | is.null(indir))){
+    metadata = clean_metadata(metadata, indir)
+    mzml_files = file.path(indir, metadata$file)
+    print_progress('Reading spectra...', verbose)
+    sps_mzr = suppressMessages(
+      Spectra(mzml_files, source = MsBackendMzR(), centroided = FALSE,
+              BPPARAM=param))
+    # Here we pick the spectrum ID from the metadata spectra_name
+    sps_mzr$spectrumId = metadata$spectra_name
+  } else if (is.null(sps_mzr) & !is.null(mzml_files) & (is.null(metadata) | is.null(indir))) {
+    print_progress('Reading spectra...', verbose)
+    sps_mzr = suppressMessages(
+      Spectra(mzml_files, source = MsBackendMzR(), centroided = FALSE,
+              BPPARAM=param))
+    if (spectrum_name_file) {
+      sps_mzr$spectrumId = get_spectra_name(sps_mzr$dataOrigin)
+    }
+  } else if (all(c(is.null(sps_mzr), is.null(mzml_files), (is.null(metadata) | is.null(indir))))){
+    stop('Please provide the metadata with sample_names and indir, ',
+         'mzml_files or a Spectra object in sps_mzr directly.')
+  }
   processingChunkSize(sps_mzr) = chunk_size
 
-  sps_mzr$spectra_name = get_spectra_name(sps_mzr@backend@spectraData$dataOrigin)
+
 
   # Weighted Moving Average Smoothing
   sps_mzr = addProcessing(
@@ -133,7 +161,7 @@ preprocess_spectra = function(
       method = 'SNIP', iterations = iterations, decreasing = TRUE)
     # Get spectra
     sp = peaksData(sps_mzr)
-    names(sp) = sps_mzr@backend@spectraData$spectra_name
+    names(sp) = sps_mzr$spectrumId
     sp = as.data.frame(sp) %>% rename(spectra_name = group_name)
     sp = bind_cols(sp, separate_sample_replicate(sp$spectra_name, sep = '_'))
     # PEAKS
@@ -176,9 +204,8 @@ preprocess_spectra = function(
 
 
   print_progress('Processing spectra ... ', verbose)
-  peaks = peaksData(sps_mzr)
-  names(peaks) = sps_mzr@backend@spectraData$spectra_name
-  print_progress('Done\n', verbose)
+  peaks = peaksData(sps_mzr, BPPARAM=param)
+  names(peaks) = sps_mzr$spectrumId
   if (make_plots) {
     int_col = 'intensity_SavitzkyGolay_bl_corr_SNIP'
   } else {
@@ -324,7 +351,7 @@ prepare_peaks = function(peaks, n_isopeaks, peptides_user=NULL, int_column='inte
 #' @examples
 calc_n_frac_peaks = function(x, n_isopeaks, min_isopeaks) {
   fracs = list()
-  for (n in c(0, min_isopeaks:n_isopeaks)) {
+  for (n in c(min_isopeaks:n_isopeaks)) {
     fracs[[paste0('frac_', n)]] = sum(x == n)/length(x)
   }
   return(data.frame(fracs))
@@ -339,6 +366,7 @@ calc_n_frac_peaks = function(x, n_isopeaks, min_isopeaks) {
 #'
 #' @return
 #' @export
+#' @importFrom Rcolor function
 #'
 #' @examples
 plot_n_peaks_per_peptide = function(peaks, n_isopeaks, min_isopeaks, ...) {
@@ -349,13 +377,29 @@ plot_n_peaks_per_peptide = function(peaks, n_isopeaks, min_isopeaks, ...) {
     ungroup() %>%
     pivot_longer(cols = starts_with('frac'), names_to='n_of_peaks',
                  names_prefix = 'frac_', values_to='fraction') %>%
-    mutate(n_of_peaks = factor(as.integer(n_of_peaks), levels=c(n_isopeaks:min_isopeaks,0)),
-           pep_number = as.factor(pep_number))
+    mutate(
+      n_of_peaks = factor(
+        as.integer(n_of_peaks), levels=c(min_isopeaks:n_isopeaks)),
+      pep_number = as.factor(pep_number))
+
+  x = min_isopeaks:n_isopeaks
+  mapped = (x - min(x)) / max(x - min(x)) * (9 - 1) + 1
+
 
   ggplot(a) +
-    geom_col(aes(x=pep_number, y=fraction, fill=n_of_peaks)) +
+    geom_col(aes(x=pep_number, y=fraction, fill=n_of_peaks),
+             position='stack') +
+    scale_fill_grey(
+      '# of isotopic\npeaks',
+      start=0.8, end=0.3) +
+    ylab('Fraction of samples') +
+    xlab('peptide') +
     facet_wrap(vars(...)) +
-    theme_bw()
+    theme_bw() +
+    theme(
+      panel.grid.minor=element_blank(),
+      axis.text.x=element_text(
+        angle=30, vjust = 0.75, size=10))
 }
 
 
