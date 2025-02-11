@@ -366,7 +366,6 @@ calc_n_frac_peaks = function(x, n_isopeaks, min_isopeaks) {
 #'
 #' @return
 #' @export
-#' @importFrom Rcolor function
 #'
 #' @examples
 plot_n_peaks_per_peptide = function(peaks, n_isopeaks, min_isopeaks, ...) {
