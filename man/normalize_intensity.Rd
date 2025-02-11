@@ -4,7 +4,7 @@
 \alias{normalize_intensity}
 \title{Normalize vector of intensities by the maximum}
 \usage{
-normalize_intensity(intensity)
+normalize_intensity(intensity, norm_func)
 }
 \arguments{
 \item{intensity}{Vector of intensities}

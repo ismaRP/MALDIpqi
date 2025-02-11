@@ -6,23 +6,28 @@
 \usage{
 prepare_peaks(
   peaks,
-  peptides_user,
   n_isopeaks,
+  peptides_user = NULL,
   int_column = "intensity",
+  norm_func = NULL,
   q2e = NULL
 )
 }
 \arguments{
 \item{peaks}{List of peaks matrix. Names are used as spectra name}
 
+\item{n_isopeaks}{Number of isotopic peaks}
+
 \item{peptides_user}{A dataframe with peptide information. It must contain at least 3 columns,
 \code{pep_number} or ID, \code{mass}, \code{sequence} and \code{h_hyp} (# of hydroxyprolines).
 IF NULL, default are used, see details.}
 
-\item{n_isopeaks}{Number of isotopic peaks}
+\item{int_column}{Columns in peaks with the intensity to be used}
 
-\item{q2e}{Optional q2e value to calculate the theoretical distribution of
-a peptide with this extent of deamidation}
+\item{norm_func}{Function to normalize the intensities of the isotopic envelope}
+
+\item{q2e}{If provided, it adds the theoretical isotopic distribution of peptides with
+this extent of deamidation}
 }
 \value{
 A data.frame with isotopic peaks detected from data, theoretical isotopic

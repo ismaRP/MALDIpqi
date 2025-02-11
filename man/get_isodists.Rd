@@ -4,10 +4,13 @@
 \alias{get_isodists}
 \title{Get isotopic distributions}
 \usage{
-get_isodists(seqs, ndeam, nhyds, long_format = F, q2e = NULL)
+get_isodists(seqs, ndeam, nhyds, norm_func, long_format = F)
 }
 \arguments{
 \item{nhyds}{Integer, vector}
+
+\item{q2e}{Optional q2e value to calculate the theoretical distribution of
+a peptide with this extent of deamidation}
 }
 \value{
 Array of intensity distributions, without the masses

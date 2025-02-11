@@ -30,5 +30,6 @@ Effectively it will calculate separate coefficient for each spectra and peptide.
 }
 \details{
 WARNING: this cannot handle too large data.frames.
-I will try to add \link{biglm} at some point. Otherwise data can be grouped by.
+I will try to add \link{biglm} at some point.
+Otherwise use group_by and the other functions
 }

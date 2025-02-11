@@ -4,7 +4,7 @@
 \alias{plot_preprocessing}
 \title{Title}
 \usage{
-plot_preprocessing(sp, peaks, peptides_user, n_isopeaks)
+plot_preprocessing(sp, peaks, peptides_user, n_isopeaks, norm_func = NULL)
 }
 \arguments{
 \item{n_isopeaks}{}

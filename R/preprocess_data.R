@@ -75,7 +75,7 @@
 #' @importFrom parallel detectCores
 #' @importFrom Spectra Spectra addProcessing peaksData
 #' @importFrom Spectra MsBackendMzR processingChunkSize
-#' @importFrom BiocParallel MulticoreParam
+#' @importFrom BiocParallel MulticoreParam SerialParam SnowParam
 #' @importFrom dplyr rename bind_cols
 #' @export
 #' @details The default peptides are the ones from Nair et al. (2022).
