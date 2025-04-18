@@ -69,13 +69,13 @@
 #' If data is provided using more than one of the options, the `sps_mzr` is used, and then the `mzml_files`.
 #'
 #'
-#' @importFrom MALDIzooMS get_spectra_name clean_metadata
+#' @importFrom MALDIzooMS get_spectra_name clean_metadata separate_sample_replicate
 #' @importFrom MALDIzooMS smooth baseline_correction peak_detection
 #' @importFrom MALDIzooMS peptide_pseudo_clusters peaks_local_bg
 #' @importFrom parallel detectCores
 #' @importFrom Spectra Spectra addProcessing peaksData
 #' @importFrom Spectra MsBackendMzR processingChunkSize
-#' @importFrom BiocParallel MulticoreParam SerialParam SnowParam
+#' @importFrom BiocParallel MulticoreParam SerialParam SnowParam register
 #' @importFrom dplyr rename bind_cols
 #' @export
 #' @details The default peptides are the ones from Nair et al. (2022).
@@ -113,11 +113,15 @@ preprocess_spectra = function(
 
   if (ncores == 1) {
     param = SerialParam(progressbar = verbose)
+    message('Using 1 core in SerialParam\n')
   } else if (.Platform$OS.type == "windows") {
     param = SnowParam(workers=ncores, progressbar = verbose)
+    message(sprintf('Using %s cores in SnowParam\n', ncores))
   } else {
     param = MulticoreParam(workers=ncores, progressbar = verbose)
+    message(sprintf('Using %s cores in MulticoreParam\n', ncores))
   }
+  register(param)
 
   if (is.null(sps_mzr) & is.null(mzml_files) & !(is.null(metadata) | is.null(indir))){
     metadata = clean_metadata(metadata, indir)
@@ -260,6 +264,7 @@ normalize_intensity = function(intensity, norm_func) {
 #' The paper contains the details on the preprocessing procedure.
 #'
 #' @importFrom dplyr mutate rename
+#' @importFrom MALDIzooMS separate_sample_replicate
 #' @export
 #'
 #' @examples
@@ -368,10 +373,14 @@ calc_n_frac_peaks = function(x, n_isopeaks, min_isopeaks) {
 #' @export
 #'
 #' @examples
-plot_n_peaks_per_peptide = function(peaks, n_isopeaks, min_isopeaks, ...) {
+plot_n_peaks_per_peptide = function(peaks, n_isopeaks, min_isopeaks, marker_order, ...) {
+
+  if (is.null(marker_odrer)) {
+    marker_order = unique(peaks$pept_name)
+  }
 
   a = peaks %>%
-    group_by(pep_number, ...) %>%
+    group_by(pept_name, ...) %>%
     summarise(calc_n_frac_peaks(n_peaks, n_isopeaks, min_isopeaks)) %>%
     ungroup() %>%
     pivot_longer(cols = starts_with('frac'), names_to='n_of_peaks',
@@ -379,14 +388,14 @@ plot_n_peaks_per_peptide = function(peaks, n_isopeaks, min_isopeaks, ...) {
     mutate(
       n_of_peaks = factor(
         as.integer(n_of_peaks), levels=c(min_isopeaks:n_isopeaks)),
-      pep_number = as.factor(pep_number))
+      pept_name = factor(pept_name, levels=marker_order))
 
   x = min_isopeaks:n_isopeaks
   mapped = (x - min(x)) / max(x - min(x)) * (9 - 1) + 1
 
 
   ggplot(a) +
-    geom_col(aes(x=pep_number, y=fraction, fill=n_of_peaks),
+    geom_col(aes(x=pept_name, y=fraction, fill=n_of_peaks),
              position='stack') +
     scale_fill_grey(
       '# of isotopic\npeaks',
@@ -398,7 +407,7 @@ plot_n_peaks_per_peptide = function(peaks, n_isopeaks, min_isopeaks, ...) {
     theme(
       panel.grid.minor=element_blank(),
       axis.text.x=element_text(
-        angle=30, vjust = 0.75, size=10))
+        angle=90, vjust = 0.75, hjust=1, size=10))
 }
 
 

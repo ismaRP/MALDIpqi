@@ -207,10 +207,10 @@ get_isodists = function(seqs, ndeam, nhyds, norm_func, long_format=F){
 #' @export
 #' @importFrom tibble tibble
 #' @examples
-predict_sample <- function(sample, replicate, pep_number, reliability, resp, pars) {
+predict_sample <- function(sample, replicate, pept_name, reliability, resp, pars) {
 
   data_I_s = data.frame(
-    sample = sample, replicate = replicate, pep_number = pep_number,
+    sample = sample, replicate = replicate, pept_name = pept_name,
     reliability = reliability, resp = resp)
 
   alpha = pars$alpha
@@ -229,10 +229,10 @@ predict_sample <- function(sample, replicate, pep_number, reliability, resp, par
     # build Xi
     Xi = sigma2_S * matrix(1, nrow(data_I_s), nrow(data_I_s)) +
       sigma2_R * outer(data_I_s$replicate, data_I_s$replicate, function(x,y){as.numeric(x == y)}) +
-      diag((data_I_s$reliability^(2*gamma)) * sigma2[as.character(data_I_s$pep_number)], nrow = nrow(data_I_s))
+      diag((data_I_s$reliability^(2*gamma)) * sigma2[as.character(data_I_s$pept_name)], nrow = nrow(data_I_s))
     # prediction
     # We don't need the estimate, as the ranef function provides it
-    # E_X = sigma2_S * sum(solve(Xi, data_I_s$resp - alpha[as.character(data_I_s$pep_number)]))
+    # E_X = sigma2_S * sum(solve(Xi, data_I_s$resp - alpha[as.character(data_I_s$pept_name)]))
     # variance
     var_X = sigma2_S - (sigma2_S^2) * sum(solve(Xi, rep(1, nrow(data_I_s))))
   }
@@ -263,7 +263,7 @@ extract_estimates = function(m) {
   sigma2_R.m = tmp["replicate.var((Intercept))"] ## variance parameter estimate for replicate
   gamma.m = coef(m$modelStruct$varStruct$A, FALSE)
   sigma2.m = m$sigma * c("pep1" = 1, coef(m$modelStruct$varStruct$B, FALSE))^2
-  sigma2.m = sigma2.m[match(levels(q_data$pep_number), names(sigma2.m))]
+  sigma2.m = sigma2.m[match(levels(q_data$pept_name), names(sigma2.m))]
 
   return(list(alpha = alpha.m, sigma2_S = sigma2_S.m, sigma2_R = sigma2_R.m,
               gamma = gamma.m, sigma2 = sigma2.m))
